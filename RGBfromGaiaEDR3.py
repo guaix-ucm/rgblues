@@ -13,7 +13,7 @@ This code is hosted at https://github.com/nicocardiel/RGBfromGaiaEDR3
 Maintainer: Nicolás Cardiel <cardiel@ucm.es>
 
 Example:
-    python RGBfromGaiaEDR3.py 56.66398954459 24.10299456629 1 12
+    python RGBfromGaiaEDR3.py 56.66 24.10 1 12
 """
 
 import argparse
@@ -38,6 +38,7 @@ import urllib
 MAX_SEARCH_RADIUS = 30  # degrees
 EDR3_SOURCE_ID_15M_ALLSKY = 'edr3_source_id_15M_allsky.fits'
 VERSION = 1.0
+
 
 def main():
 
@@ -268,14 +269,14 @@ def main():
         iok = r_edr3['phot_g_mean_mag'] < args.brightlimit
         if args.nocolor:
             sc = ax.scatter(x_pix[iok], y_pix[iok], marker='*', color='grey',
-                       edgecolors='black', linewidth=0.2, s=symbol_size[iok])
+                            edgecolors='black', linewidth=0.2, s=symbol_size[iok])
             ax.scatter(x_pix[~iok], y_pix[~iok], marker='.', color='grey',
                        edgecolors='black', linewidth=0.2, s=symbol_size[~iok])
         else:
             cmap = plt.cm.get_cmap('jet')
-            sc= ax.scatter(x_pix[iok], y_pix[iok], marker='*',
-                       edgecolors='black', linewidth=0.2, s=symbol_size[iok],
-                       cmap=cmap, c=r_edr3[iok]['bp_rp'])
+            sc = ax.scatter(x_pix[iok], y_pix[iok], marker='*',
+                            edgecolors='black', linewidth=0.2, s=symbol_size[iok],
+                            cmap=cmap, c=r_edr3[iok]['bp_rp'])
             ax.scatter(x_pix[~iok], y_pix[~iok], marker='.',
                        edgecolors='black', linewidth=0.2, s=symbol_size[~iok],
                        cmap=cmap, c=r_edr3[~iok]['bp_rp'])
@@ -288,22 +289,42 @@ def main():
         iok = np.array(sorter[np.searchsorted(r_edr3['source_id'], np.array(list(intersection)), sorter=sorter)])
         ax.scatter(x_pix[iok], y_pix[iok], s=240, marker='o', facecolors='none', edgecolors='red', linewidth=0.5)
 
+        ax.scatter(0.03, 0.96, s=240, marker='o', facecolors='white', edgecolors='red', linewidth=0.5,
+                   transform=ax.transAxes)
+        ax.text(0.06, 0.96, 'star in 15M sample', fontsize=12, backgroundcolor='white',
+                horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+        ax.scatter(0.03, 0.92, s=240, marker='s', facecolors='white', edgecolors='blue', linewidth=0.5,
+                   transform=ax.transAxes)
+        ax.text(0.06, 0.92, 'variable in Gaia DR2', fontsize=12, backgroundcolor='white',
+                horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+
         ax.set_xlabel('ra')
         ax.set_ylabel('dec')
 
         ax.set_aspect('equal')
 
         if not args.nocolor:
-            cbaxes = fig.add_axes([0.20, 0.84, 0.15, 0.02])
+            cbaxes = fig.add_axes([0.683, 0.81, 0.15, 0.02])
             cbar = plt.colorbar(sc, cax=cbaxes, orientation='horizontal', format='%3.1f')
             cbar.ax.tick_params(labelsize=12)
-            cbar.set_label(label=r'$G_{\rm BP}-G_{\rm RP}$', size=12)
+            cbar.set_label(label=r'$G_{\rm BP}-G_{\rm RP}$', size=12, backgroundcolor='white')
 
+        ax.text(0.98, 0.96, f'Field radius: {args.search_radius:.4f} degree', fontsize=12, backgroundcolor='white',
+                horizontalalignment='right', verticalalignment='center', transform=ax.transAxes)
+        ax.text(0.02, 0.06, r'$\alpha_{\rm center}$:', fontsize=12, backgroundcolor='white',
+                horizontalalignment='left', verticalalignment='bottom', transform=ax.transAxes)
+        ax.text(0.30, 0.06, f'{args.ra_center:.4f} degree', fontsize=12, backgroundcolor='white',
+                horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
+        ax.text(0.02, 0.02, r'$\delta_{\rm center}$:', fontsize=12, backgroundcolor='white',
+                horizontalalignment='left', verticalalignment='bottom', transform=ax.transAxes)
+        ax.text(0.30, 0.02, f'{args.dec_center:+.4f} degree', fontsize=12, backgroundcolor='white',
+                horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
+        ax.text(0.98, 0.02, f'RGBfromGaiaEDR3, version {VERSION}', fontsize=12, backgroundcolor='white',
+                horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
+
+        ax.set_axisbelow(True)
         overlay = ax.get_coords_overlay('icrs')
         overlay.grid(color='black', ls='dotted')
-
-        ax.text(0.99, 0.01, f'RGBfromGaiaEDR3, version {VERSION}', fontsize=12,
-                horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
 
         plt.savefig(f'{args.basename}.pdf')
         plt.close(fig)
