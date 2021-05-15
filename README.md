@@ -61,12 +61,12 @@ The script executes the following steps:
     - `rgbsearch_15m.csv`: stars belonging to the ~15 million star sample 
       of C21 (with reliable RGB magnitude estimates)
       
-    - `rgbsearch_var.csv`: stars flagged as variable in DR2.
+    - `rgbsearch_var.csv`: objects flagged as variable in DR2.
     
-    - `rgbsearch_edr3.csv`: remaining stars in EDR3. The RGB magnitude 
+    - `rgbsearch_edr3.csv`: remaining objects in EDR3. The RGB magnitude 
       estimates of these objects can be potentially biased due to 
       systematic effects introduced by interstellar extinction and 
-      non-solar metallicity. This file will typically contain many more stars 
+      non-solar metallicity. This file will typically contain many more stars
       than the `rgbsearch_15m.csv` selection.
       
   The three CSV files provide the same 10 parameters: 
