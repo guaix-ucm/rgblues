@@ -12,14 +12,13 @@ RGB predictions of Gaia EDR3 stars
 This code is hosted at https://github.com/nicocardiel/RGBfromGaiaEDR3
 Maintainer: Nicolás Cardiel <cardiel@ucm.es>
 
-Example:
-    python RGBfromGaiaEDR3.py 56.66 24.10 1 12
+Usage example:
+$ python RGBfromGaiaEDR3.py 56.66 24.10 1.0 12
 """
 
 import argparse
 from astropy import units as u
 from astropy.coordinates import SkyCoord
-from astropy.io import ascii
 from astropy.io import fits
 from astropy.table import Column
 from astropy.wcs import WCS
@@ -44,16 +43,17 @@ VERSION = 1.0
 def main():
 
     parser = argparse.ArgumentParser(description="RGB predictions for Gaia EDR3 stars")
-    parser.add_argument("ra_center", help="Right Ascension (decimal degrees)", type=float)
-    parser.add_argument("dec_center", help="Declination (decimal degrees)", type=float)
-    parser.add_argument("search_radius", help="Search radius (decimal degrees)", type=float)
-    parser.add_argument("g_limit", help="Limiting Gaia G magnitude", type=float)
-    parser.add_argument("--basename", help="File basename for output files", type=str, default="rgbsearch")
+    parser.add_argument("ra_center", help="right Ascension (decimal degrees)", type=float)
+    parser.add_argument("dec_center", help="declination (decimal degrees)", type=float)
+    parser.add_argument("search_radius", help="search radius (decimal degrees)", type=float)
+    parser.add_argument("g_limit", help="limiting Gaia G magnitude", type=float)
+    parser.add_argument("--basename", help="file basename for output files", type=str, default="rgbsearch")
     parser.add_argument("--brightlimit",
-                        help="Stars brighter that this Gaia G limit are displayed with star symbols",
+                        help="stars brighter than this Gaia G limit are displayed with star symbols",
                         type=float, default=8.0)
-    parser.add_argument("--nocolor", help="Do not use colors in PDF chart", action="store_true")
-    parser.add_argument("--verbose", help="Increase program verbosity", action="store_true")
+    parser.add_argument("--noplot", help="skip PDF chart generation", action="store_true")
+    parser.add_argument("--nocolor", help="do not use colors in PDF chart", action="store_true")
+    parser.add_argument("--verbose", help="increase program verbosity", action="store_true")
 
     args = parser.parse_args()
 
@@ -299,6 +299,9 @@ def main():
         f.close()
     print('OK')
 
+    if args.noplot:
+        raise SystemExit()
+
     # ---
 
     sys.stdout.write('<STEP7> Generating PDF plot...')
@@ -382,7 +385,6 @@ def main():
     plt.savefig(f'{args.basename}.pdf')
     plt.close(fig)
     print('OK')
-
 
 if __name__ == "__main__":
 
