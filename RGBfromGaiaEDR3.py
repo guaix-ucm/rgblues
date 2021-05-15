@@ -120,24 +120,24 @@ def main():
     
     ORDER BY ra
     """
-    sys.stdout.write('<STEP1> Starting cone search in Gaia EDR3... (please wait) ')
+    sys.stdout.write('<STEP1> Starting cone search in Gaia EDR3... (please wait)\n  ')
     sys.stdout.flush()
     job = Gaia.launch_job_async(query)
     r_edr3 = job.get_results()
     nstars = len(r_edr3)
-    print(f'       --> {nstars} stars found')
+    print(f'        --> {nstars} stars found')
     if nstars == 0:
         raise SystemExit('ERROR: no stars found. Change search parameters!')
     if args.verbose:
         r_edr3.pprint(max_width=1000)
 
     # intersection with 15M star sample
-    sys.stdout.write('<STEP2> Cross-matching EDR3 with 15M subsample... (please wait) ')
+    sys.stdout.write('<STEP2> Cross-matching EDR3 with 15M subsample... (please wait)')
     sys.stdout.flush()
     set1 = set(np.array(r_edr3['source_id']))
     set2 = set(edr3_source_id_15M_allsky)
     intersection = set2.intersection(set1)
-    print(f'\n       --> {len(intersection)} stars in common with 15M sample')
+    print(f'\n        --> {len(intersection)} stars in common with 15M sample')
     if args.verbose:
         print(len(set1), len(set2), len(intersection))
 
@@ -151,7 +151,7 @@ def main():
       CIRCLE('ICRS',ra, dec, {args.search_radius}))
     AND phot_g_mean_mag < {args.g_limit}
     """
-    sys.stdout.write('<STEP3> Looking for variable stars in Gaia DR2... (please wait) ')
+    sys.stdout.write('<STEP3> Looking for variable stars in Gaia DR2... (please wait)\n  ')
     sys.stdout.flush()
     job = Gaia.launch_job_async(query)
     r_dr2 = job.get_results()
@@ -167,7 +167,7 @@ def main():
         else:
             raise SystemExit('Unexpected type of data in column phot_variable_flag')
         nvariables = sum(mask_var)
-        print(f'       --> {nstars_dr2} stars in DR2, ({nvariables} initial variables)')
+        print(f'        --> {nstars_dr2} stars in DR2, ({nvariables} initial variables)')
     if nvariables > 0:
         if args.verbose:
             r_dr2[mask_var].pprint(max_width=1000)
@@ -188,7 +188,7 @@ def main():
         WHERE dr2_source_id IN {dumstr}
         ORDER BY angular_distance
         """
-        sys.stdout.write('<STEP4> Cross-matching variables in DR2 with stars in EDR3... (please wait) ')
+        sys.stdout.write('<STEP4> Cross-matching variables in DR2 with stars in EDR3... (please wait)\n  ')
         sys.stdout.flush()
         job = Gaia.launch_job_async(query)
         r_cross_var = job.get_results()
@@ -212,7 +212,7 @@ def main():
             r_cross_var = None
     else:
         r_cross_var = None  # Avoid PyCharm warning
-    print(f'       --> {nvariables} variable(s) in selected EDR3 star sample')
+    print(f'        --> {nvariables} variable(s) in selected EDR3 star sample')
 
     sys.stdout.write('<STEP5> Computing RGB magnitudes...')
     sys.stdout.flush()
