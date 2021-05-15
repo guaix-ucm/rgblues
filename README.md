@@ -9,6 +9,9 @@ in [Cardiel et al. (2021; hereafter C21)](#1)
 The cone search is performed making use of the Astroquery coordinated 
 package of astropy. 
 
+You need to have a live connection to the Internet for 
+the script to work!
+
 ## Downloading and executing the code
 
 In order to keep everything as simple as possible, this code does not need 
