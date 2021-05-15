@@ -82,6 +82,8 @@ The script executes the following steps:
     - `phot_g_mean_mag`: *Gaia* G magnitude (EDR3)
     - `phot_bp_mean_mag`: *Gaia* G_BP magnitude (EDR3)
     - `phot_rp_mean_mag`: *Gaia* G_RP magnitude (EDR3)
+
+  The list of objects in those files is sorted by right ascension.
     
 - Step 7: generation of a finding chart plot (in PDF format): `rgbsearch.
   pdf`. The execution of the previous example generates a cone search around 
