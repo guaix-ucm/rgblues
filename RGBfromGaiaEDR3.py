@@ -336,14 +336,16 @@ def main():
                    cmap=cmap, c=r_edr3[~iok]['bp_rp'])
 
     # variable stars
-    sorter = np.argsort(r_edr3['source_id'])
-    iok = np.array(sorter[np.searchsorted(r_edr3['source_id'], r_cross_var['dr3_source_id'], sorter=sorter)])
-    ax.scatter(x_pix[iok], y_pix[iok], s=240, marker='s', facecolors='none', edgecolors='blue', linewidth=0.5)
+    if nvariables > 0:
+        sorter = np.argsort(r_edr3['source_id'])
+        iok = np.array(sorter[np.searchsorted(r_edr3['source_id'], r_cross_var['dr3_source_id'], sorter=sorter)])
+        ax.scatter(x_pix[iok], y_pix[iok], s=240, marker='s', facecolors='none', edgecolors='blue', linewidth=0.5)
 
     # stars in 15M sample
-    sorter = np.argsort(r_edr3['source_id'])
-    iok = np.array(sorter[np.searchsorted(r_edr3['source_id'], np.array(list(intersection)), sorter=sorter)])
-    ax.scatter(x_pix[iok], y_pix[iok], s=240, marker='o', facecolors='none', edgecolors='red', linewidth=0.5)
+    if len(intersection) > 0:
+        sorter = np.argsort(r_edr3['source_id'])
+        iok = np.array(sorter[np.searchsorted(r_edr3['source_id'], np.array(list(intersection)), sorter=sorter)])
+        ax.scatter(x_pix[iok], y_pix[iok], s=240, marker='o', facecolors='none', edgecolors='red', linewidth=0.5)
 
     ax.scatter(0.03, 0.96, s=240, marker='o', facecolors='white', edgecolors='red', linewidth=0.5,
                transform=ax.transAxes)
