@@ -49,7 +49,7 @@ def main():
     parser.add_argument("g_limit", help="limiting Gaia G magnitude", type=float)
     parser.add_argument("--basename", help="file basename for output files", type=str, default="rgbsearch")
     parser.add_argument("--brightlimit",
-                        help="stars brighter than this Gaia G limit are displayed with star symbols",
+                        help="stars brighter than this Gaia G limit are displayed with star symbols (default=8.0)",
                         type=float, default=8.0)
     parser.add_argument("--noplot", help="skip PDF chart generation", action="store_true")
     parser.add_argument("--nocolor", help="do not use colors in PDF chart", action="store_true")

@@ -119,7 +119,7 @@ optional arguments:
   --basename BASENAME   file basename for output files
   --brightlimit BRIGHTLIMIT
                         stars brighter than this Gaia G limit are displayed 
-                        with star symbols
+                        with star symbols (default=8.0)
   --noplot              skip PDF chart generation
   --nocolor             do not use colors in PDF chart
   --verbose             increase program verbosity
