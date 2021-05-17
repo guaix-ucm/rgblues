@@ -68,8 +68,9 @@ The script executes the following steps:
     
     - `rgbsearch_edr3.csv`: remaining objects in EDR3. The RGB magnitude 
       estimates of these objects can be potentially biased due to 
-      systematic effects introduced by interstellar extinction and 
-      non-solar metallicity. This file will typically contain many more stars
+      systematic effects introduced by interstellar extinction, or by 
+      exhibiting non-solar metallicity, or a colour outside the *Gaia* -0.5 < 
+      G_BP-G_RP < 2.0 interval. This file will typically contain more stars 
       than the `rgbsearch_15m.csv` selection.
       
   The three CSV files provide the same 10 parameters: 
@@ -94,8 +95,10 @@ The script executes the following steps:
   ![Pleiades chart](http://nartex.fis.ucm.es/~ncl/rgbphot/gaia/pleiades.png)
   The stars in this plot are color coded based on the *Gaia* G_BP - G_RP 
   colour. A red circle has been overplotted on the stars belonging to 
-  the ~15 million star sample of C21, and a blue square on the variable 
-  objects in DR2. Stars brighter than a pre-defined threshold are displayed 
+  the ~15 million star sample of C21, a blue square on the variable 
+  objects in DR2, and a magenta diamond on EDR3 stars outside the *Gaia* 
+  -0.5 < G_BP - G_RP < 2.0 colour interval. 
+  Stars brighter than a pre-defined threshold are displayed 
   with big star symbols. 
 
 Note that the four output files share the same root name `rgbsearch`. This 
