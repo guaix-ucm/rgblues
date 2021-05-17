@@ -151,7 +151,7 @@ and [Cardiel et al. (2021b)](#2).
 
 ## Bibliography
 
-<a id="3">Anders et al. (2018)</a>, https://ui.adsabs.harvard.edu/abs/2019A%26A...628A..94A/abstract
+<a id="3">Anders et al. (2019)</a>, https://ui.adsabs.harvard.edu/abs/2019A%26A...628A..94A/abstract
 
 <a id="1">Cardiel et al. (2021a)</a>, MNRAS, in press, https://ui.adsabs.harvard.edu/abs/2021MNRAS.tmp..971C/abstract
 
