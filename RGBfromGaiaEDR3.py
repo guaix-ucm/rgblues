@@ -52,6 +52,8 @@ def main():
     parser.add_argument("--brightlimit",
                         help="stars brighter than this Gaia G limit are displayed with star symbols (default=8.0)",
                         type=float, default=8.0)
+    parser.add_argument("--symbsize", help="multiplying factor for symbol size (default=1.0)",
+                        type=float, default=1.0)
     parser.add_argument("--noplot", help="skip PDF chart generation", action="store_true")
     parser.add_argument("--nocolor", help="do not use colors in PDF chart", action="store_true")
     parser.add_argument("--starhorse", help="include StarHorse av50, met50 and dist50 in rgbsearch_15m.csv",
@@ -316,7 +318,7 @@ def main():
                   }
     if set(outcolumns_list) != set(outcolumns.keys()):
         raise SystemExit('ERROR: check outcolumns_list and outcolumns')
-    csv_header = ','.join(outcolumns_list)
+    csv_header = 'number,' + ','.join(outcolumns_list)
     flist = []
     for ftype in outtypes:
         f = open(f'{args.basename}_{ftype}.csv', 'wt')
@@ -330,6 +332,7 @@ def main():
         else:
             f.write(csv_header + '\n')
     # save each star in its corresponding output file
+    krow = np.ones(len(outtypes), dtype=int)
     for row in r_edr3:
         cout = []
         for item in outcolumns_list:
@@ -354,7 +357,8 @@ def main():
                         cout.append(f"{edr3_g_gaia_15M_allsky[iloc]:8.4f}")
                         cout.append(f"{edr3_bp_gaia_15M_allsky[iloc]:8.4f}")
                         cout.append(f"{edr3_rp_gaia_15M_allsky[iloc]:8.4f}")
-        flist[iout].write(','.join(cout) + '\n')
+        flist[iout].write(f'{krow[iout]:6d}, ' + ','.join(cout) + '\n')
+        krow[iout] += 1
     for f in flist:
         f.close()
     print('OK')
@@ -372,7 +376,7 @@ def main():
         print('')
         r_edr3.pprint(max_width=1000)
 
-    symbol_size = (50 / np.array(r_edr3['phot_g_mean_mag'])) ** 2.5
+    symbol_size = args.symbsize * (50 / np.array(r_edr3['phot_g_mean_mag'])) ** 2.5
     ra_array = np.array(r_edr3['ra'])
     dec_array = np.array(r_edr3['dec'])
 
@@ -400,7 +404,7 @@ def main():
     if nstars_colorcut > 0:
         mask_colour = np.logical_or((r_edr3['bp_rp'] <= -0.5), (r_edr3['bp_rp'] >= 2.0))
         iok = np.argwhere(mask_colour)
-        ax.scatter(x_pix[iok], y_pix[iok], s=240, marker='D', facecolors='none', edgecolors='magenta', linewidth=0.5)
+        ax.scatter(x_pix[iok], y_pix[iok], s=240, marker='D', facecolors='none', edgecolors='grey', linewidth=0.5)
 
     # variable stars
     if nvariables > 0:
@@ -422,7 +426,7 @@ def main():
                transform=ax.transAxes)
     ax.text(0.06, 0.92, 'variable in Gaia DR2', fontsize=12, backgroundcolor='white',
             horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-    ax.scatter(0.03, 0.88, s=240, marker='D', facecolors='white', edgecolors='magenta', linewidth=0.5,
+    ax.scatter(0.03, 0.88, s=240, marker='D', facecolors='white', edgecolors='grey', linewidth=0.5,
                transform=ax.transAxes)
     ax.text(0.06, 0.88, 'outside colour range', fontsize=12, backgroundcolor='white',
             horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)

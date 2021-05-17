@@ -76,8 +76,9 @@ The script executes the following steps:
       G_BP-G_RP < 2.0 interval. This file will typically contain more stars 
       than the `rgbsearch_15m.csv` selection.
       
-  The three CSV files provide the same 10 parameters: 
+  The three CSV files provide the same 11 columns:
   
+    - `number`: consecutive number of the star in each CSV file
     - `source_id`: identification in EDR3
     - `ra`: right ascension (from EDR3)
     - `dec`: declination (from EDR3)
@@ -105,7 +106,7 @@ The script executes the following steps:
   The stars in this plot are color coded based on the *Gaia* G_BP - G_RP 
   colour. A red circle has been overplotted on the stars belonging to 
   the ~15 million star sample of C21, a blue square on the variable 
-  objects in DR2, and a magenta diamond on EDR3 stars outside the *Gaia* 
+  objects in DR2, and a grey diamond on EDR3 stars outside the *Gaia* 
   -0.5 < G_BP - G_RP < 2.0 colour interval. 
   Stars brighter than a pre-defined threshold are displayed 
   with big star symbols. 
