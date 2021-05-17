@@ -101,19 +101,23 @@ The script executes the following steps:
     - `dist50`: 50th percentile of the distance (kpc)
 
 - Step 7: generation of a finding chart plot (in PDF format): `rgbsearch.pdf`. The execution of the previous example generates a cone search around 
-  the Pleiades star cluster:
-  ![Pleiades plot](http://nartex.hst.ucm.es/~ncl/rgbphot/gaia/pleiades_v1.png)
+  the [Pleiades](https://en.wikipedia.org/wiki/Pleiades) star cluster:
+  ![Pleiades plot](http://nartex.hst.ucm.es/~ncl/rgbphot/gaia/pleiades_v2.png)
   The stars in this plot are color coded based on the *Gaia* G_BP - G_RP 
   colour. A red circle has been overplotted on the stars belonging to 
   the ~15 million star sample of C21, a blue square on the variable 
   objects in DR2, and a grey diamond on EDR3 stars outside the *Gaia* 
   -0.5 < G_BP - G_RP < 2.0 colour interval. 
   Stars brighter than a pre-defined threshold are displayed 
-  with big star symbols. 
+  with big star symbols. To facilitate the identification of each star, the
+  consecutive star number in the three files (`rgbsearch_15m.csv`,
+  `rgbsearch_edr3.csv` and `rgbsearch_var.csv`) is also displayed (in red,
+  black and blue, respectively). These numbers are not displayed when using the
+  parameter `--nonumbers` in the command line.
 
-Note that the four output files share the same root name `rgbsearch`. This 
-can be easily modified using the optional argument `--basename 
-<newbasename>` in the command line.
+Note that the four output archives (1 PDF and 3 CSV files) share the same root
+name `rgbsearch`. This can be easily modified using the optional argument
+`--basename <newbasename>` in the command line.
 
 ### Additional help
 
@@ -138,6 +142,8 @@ optional arguments:
   --brightlimit BRIGHTLIMIT
                         stars brighter than this Gaia G limit are displayed 
                         with star symbols (default=8.0)
+  --symbsize SYMBSIZE   multiplying factor for symbol size (default=1.0)
+  --nonumbers           do not display star numbers in PDF chart
   --noplot              skip PDF chart generation
   --nocolor             do not use colors in PDF chart
   --starhorse           include StarHorse av50, met50 and dist50 in rgbsearch_15m.csv

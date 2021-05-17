@@ -54,6 +54,7 @@ def main():
                         type=float, default=8.0)
     parser.add_argument("--symbsize", help="multiplying factor for symbol size (default=1.0)",
                         type=float, default=1.0)
+    parser.add_argument("--nonumbers", help="do not display star numbers in PDF chart", action="store_true")
     parser.add_argument("--noplot", help="skip PDF chart generation", action="store_true")
     parser.add_argument("--nocolor", help="do not use colors in PDF chart", action="store_true")
     parser.add_argument("--starhorse", help="include StarHorse av50, met50 and dist50 in rgbsearch_15m.csv",
@@ -292,6 +293,10 @@ def main():
     sys.stdout.write('<STEP6> Saving output CSV files...')
     sys.stdout.flush()
     outtypes = ['edr3', '15m', 'var']
+    outtypes_color = {'edr3': 'black', '15m': 'red', 'var': 'blue'}
+    r_edr3.add_column(Column(np.zeros(len(r_edr3)), name='number_csv', dtype=int))
+    for item in outtypes:
+        r_edr3.add_column(Column(np.zeros(len(r_edr3)), name=f'number_{item}', dtype=int))
     outlist = [f'./{args.basename}_{ftype}.csv' for ftype in outtypes]
     filelist = glob.glob('./*.csv')
     # remove previous versions of the output files (if present)
@@ -333,7 +338,7 @@ def main():
             f.write(csv_header + '\n')
     # save each star in its corresponding output file
     krow = np.ones(len(outtypes), dtype=int)
-    for row in r_edr3:
+    for irow, row in enumerate(r_edr3):
         cout = []
         for item in outcolumns_list:
             cout.append(eval("f'{row[item]:" + f'{outcolumns[item]}' + "}'"))
@@ -358,10 +363,15 @@ def main():
                         cout.append(f"{edr3_bp_gaia_15M_allsky[iloc]:8.4f}")
                         cout.append(f"{edr3_rp_gaia_15M_allsky[iloc]:8.4f}")
         flist[iout].write(f'{krow[iout]:6d}, ' + ','.join(cout) + '\n')
+        r_edr3[irow]['number_csv'] = iout
+        r_edr3[irow][f'number_{outtypes[iout]}'] = krow[iout]
         krow[iout] += 1
     for f in flist:
         f.close()
     print('OK')
+
+    if args.verbose:
+        print(r_edr3)
 
     if args.noplot:
         raise SystemExit()
@@ -400,6 +410,15 @@ def main():
                    edgecolors='black', linewidth=0.2, s=symbol_size[~iok],
                    cmap=cmap, c=r_edr3[~iok]['bp_rp'], vmin=-0.5, vmax=2.0)
 
+    # display numbers if requested
+    if not args.nonumbers:
+        for irow in range(len(r_edr3)):
+            number_csv = r_edr3[irow]['number_csv']
+            text = r_edr3[irow][f'number_{outtypes[number_csv]}']
+            ax.text(x_pix[irow], y_pix[irow], text,
+                    color=outtypes_color[outtypes[number_csv]], fontsize='5',
+                    horizontalalignment='left', verticalalignment='bottom')
+
     # stars outside the -0.5 < G_BP - G_RP < 2.0 colour cut
     if nstars_colorcut > 0:
         mask_colour = np.logical_or((r_edr3['bp_rp'] <= -0.5), (r_edr3['bp_rp'] >= 2.0))
@@ -416,16 +435,21 @@ def main():
     if len(intersection) > 0:
         sorter = np.argsort(r_edr3['source_id'])
         iok = np.array(sorter[np.searchsorted(r_edr3['source_id'], np.array(list(intersection)), sorter=sorter)])
-        ax.scatter(x_pix[iok], y_pix[iok], s=240, marker='o', facecolors='none', edgecolors='red', linewidth=0.5)
+        ax.scatter(x_pix[iok], y_pix[iok], s=240, marker='o', facecolors='none',
+                   edgecolors=outtypes_color['15m'], linewidth=0.5)
 
-    ax.scatter(0.03, 0.96, s=240, marker='o', facecolors='white', edgecolors='red', linewidth=0.5,
+    ax.scatter(0.03, 0.96, s=240, marker='o', facecolors='white',
+               edgecolors=outtypes_color['15m'], linewidth=0.5,
                transform=ax.transAxes)
     ax.text(0.06, 0.96, 'star in 15M sample', fontsize=12, backgroundcolor='white',
             horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-    ax.scatter(0.03, 0.92, s=240, marker='s', facecolors='white', edgecolors='blue', linewidth=0.5,
+
+    ax.scatter(0.03, 0.92, s=240, marker='s', facecolors='white',
+               edgecolors=outtypes_color['var'], linewidth=0.5,
                transform=ax.transAxes)
     ax.text(0.06, 0.92, 'variable in Gaia DR2', fontsize=12, backgroundcolor='white',
             horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+
     ax.scatter(0.03, 0.88, s=240, marker='D', facecolors='white', edgecolors='grey', linewidth=0.5,
                transform=ax.transAxes)
     ax.text(0.06, 0.88, 'outside colour range', fontsize=12, backgroundcolor='white',
