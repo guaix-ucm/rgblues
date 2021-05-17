@@ -32,10 +32,11 @@ four positional arguments: right ascension, declination, search radius and
 limiting *Gaia* G magnitude. *Note that the coordinates and search radius 
 must be given in decimal degrees*.
 
-The first time you execute the code, the auxiliary file 
-`edr3_source_id_15M_allsky.fits`, containing the `source_id`of the *Gaia* 
-EDR3 stars belonging to the ~15 million star sample of C21, is automatically 
-downloaded. 
+The first time you execute the code, the auxiliary file
+`edr3_source_id_15M_allsky.fits` (size 129 Mb), containing the `source_id`of
+the *Gaia* EDR3 stars belonging to the ~15 million star sample of C21, is
+automatically downloaded. When using the `--starhorse`, a larger file (size
+289Mb), containing additional star parameters, is downloaded instead.
 
 The script executes the following steps:
 

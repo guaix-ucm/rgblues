@@ -37,6 +37,7 @@ import urllib
 
 MAX_SEARCH_RADIUS = 30  # degrees
 EDR3_SOURCE_ID_15M_ALLSKY = 'edr3_source_id_15M_allsky.fits'
+EDR3_SOURCE_ID_PARAMS_15M_ALLSKY = 'edr3_source_id_params_15M_allsky.fits'
 RGB_FROM_GAIA_ALLSKY = 'rgb_from_gaia_allsky.fits'
 VERSION = 1.0
 
@@ -79,7 +80,10 @@ def main():
 
     # check whether the auxiliary FITS binary table exists
     if args.starhorse:
-        auxbintable = RGB_FROM_GAIA_ALLSKY
+        if args.debug:
+            auxbintable = RGB_FROM_GAIA_ALLSKY
+        else:
+            auxbintable = EDR3_SOURCE_ID_PARAMS_15M_ALLSKY
     else:
         auxbintable = EDR3_SOURCE_ID_15M_ALLSKY
     if os.path.isfile(auxbintable):
@@ -96,16 +100,17 @@ def main():
         with fits.open(auxbintable) as hdul_table:
             edr3_source_id_15M_allsky = hdul_table[1].data.source_id
             if args.starhorse:
-                edr3_b_rgb_15M_allsky = hdul_table[1].data.B_rgb
-                edr3_g_rgb_15M_allsky = hdul_table[1].data.G_rgb
-                edr3_r_rgb_15M_allsky = hdul_table[1].data.R_rgb
-                edr3_g_br_rgb_15M_allsky = hdul_table[1].data.G_BR_rgb
-                edr3_g_gaia_15M_allsky = hdul_table[1].data.G_gaia
-                edr3_bp_gaia_15M_allsky = hdul_table[1].data.BP_gaia
-                edr3_rp_gaia_15M_allsky = hdul_table[1].data.RP_gaia
                 edr3_av50_15M_allsky = hdul_table[1].data.av50
                 edr3_met50_15M_allsky = hdul_table[1].data.met50
                 edr3_dist50_15M_allsky = hdul_table[1].data.dist50
+                if args.debug:
+                    edr3_b_rgb_15M_allsky = hdul_table[1].data.B_rgb
+                    edr3_g_rgb_15M_allsky = hdul_table[1].data.G_rgb
+                    edr3_r_rgb_15M_allsky = hdul_table[1].data.R_rgb
+                    edr3_g_br_rgb_15M_allsky = hdul_table[1].data.G_BR_rgb
+                    edr3_g_gaia_15M_allsky = hdul_table[1].data.G_gaia
+                    edr3_bp_gaia_15M_allsky = hdul_table[1].data.BP_gaia
+                    edr3_rp_gaia_15M_allsky = hdul_table[1].data.RP_gaia
 
     except FileNotFoundError:
         raise SystemExit(f'ERROR: unexpected problem while reading {EDR3_SOURCE_ID_15M_ALLSKY}')
