@@ -95,7 +95,7 @@ The script executes the following steps:
     - `av50`: 50th percentile of the interstellar extinction 
     - `met50`: 50th percentile of the metallicity [M/H]
     - `dist50`: 50th percentile of the distance (kpc)
-    
+
 - Step 7: generation of a finding chart plot (in PDF format): `rgbsearch.pdf`. The execution of the previous example generates a cone search around 
   the Pleiades star cluster:
   ![Pleiades plot, version 1](http://nartex.hst.ucm.es/~ncl/rgbphot/gaia/pleiades.png)
@@ -142,7 +142,10 @@ optional arguments:
 ```
 
 ## Citation
-If you find this Python script useful, please cite:
+If you find this Python script useful, please cite [Cardiel et al. (2021)](#1)
+
+
+## Bibliography
 
 <a id="2">Anders et al. (2018)</a>, https://ui.adsabs.harvard.edu/abs/2019A%26A...628A..94A/abstract
 
