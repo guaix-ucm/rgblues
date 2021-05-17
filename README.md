@@ -102,9 +102,7 @@ The script executes the following steps:
 
 - Step 7: generation of a finding chart plot (in PDF format): `rgbsearch.pdf`. The execution of the previous example generates a cone search around 
   the Pleiades star cluster:
-  <!---
-  ![Pleiades plot, version 2](http://nartex.hst.ucm.es/~ncl/rgbphot/gaia/pleiades.png)
-  --->
+  ![Pleiades plot, version 3](http://nartex.hst.ucm.es/~ncl/rgbphot/gaia/pleiades.png)
   The stars in this plot are color coded based on the *Gaia* G_BP - G_RP 
   colour. A red circle has been overplotted on the stars belonging to 
   the ~15 million star sample of C21, a blue square on the variable 
