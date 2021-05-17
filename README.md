@@ -153,7 +153,9 @@ optional arguments:
 
 ## Citation
 If you find this Python script useful, please cite [Cardiel et al. (2021a)](#1)
-and [Cardiel et al. (2021b)](#2).
+(to quote the use of the standard RGB system)
+and [Cardiel et al. (2021b)](#2) (where the transformation between the *Gaia*
+photometry and the RGB magnitudes is derived).
 
 
 ## Bibliography
