@@ -145,7 +145,8 @@ optional arguments:
 ```
 
 ## Citation
-If you find this Python script useful, please cite [Cardiel et al. (2021)](#1)
+If you find this Python script useful, please cite [Cardiel et al. (2021a)](#1)
+and [Cardiel et al. (2021b)](#2).
 
 
 ## Bibliography
