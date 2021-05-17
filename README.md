@@ -1,10 +1,13 @@
 # RGBfromGaiaEDR3
 
 This Python script predicts RGB magnitudes from *Gaia* EDR3 
-photometric data. The code performs a cone search defined by coordinates 
+photometric data. These magnitudes are given in the standard system defined by
+[Cardiel et al. (2021a)](#1).
+
+The code performs a cone search defined by coordinates 
 right ascension and declination on the sky and a search radius. The 
 predictions make use of the polynomial transformations given by Eqs. (2)-(5)
-in [Cardiel et al. (2021; hereafter C21)](#1)
+in [Cardiel et al. (2021b; hereafter C21)](#2)
 
 The cone search is performed making use of the Astroquery coordinated 
 package of astropy. 
@@ -62,7 +65,7 @@ The script executes the following steps:
   generated: 
 
     - `rgbsearch_15m.csv`: stars belonging to the ~15 million star sample 
-      of C21 (with reliable RGB magnitude estimates)
+      of C21 (with reliable RGB magnitude estimates).
       
     - `rgbsearch_var.csv`: objects flagged as variable in DR2.
     
@@ -90,7 +93,7 @@ The script executes the following steps:
   The list of objects in those files is sorted by right ascension.
 
   When using `--starhorse`, the file `rgbsearch_15m.csv` contains 3 additional
-  columns providing parameters derived by [Anders et al. (2019)](#2):
+  columns providing parameters derived by [Anders et al. (2019)](#3):
 
     - `av50`: 50th percentile of the interstellar extinction 
     - `met50`: 50th percentile of the metallicity [M/H]
@@ -147,6 +150,8 @@ If you find this Python script useful, please cite [Cardiel et al. (2021)](#1)
 
 ## Bibliography
 
-<a id="2">Anders et al. (2018)</a>, https://ui.adsabs.harvard.edu/abs/2019A%26A...628A..94A/abstract
+<a id="3">Anders et al. (2018)</a>, https://ui.adsabs.harvard.edu/abs/2019A%26A...628A..94A/abstract
 
-<a id="1">Cardiel et al. (2021)</a>, MNRAS, in preparation
+<a id="1">Cardiel et al. (2021a)</a>, MNRAS, in press, https://ui.adsabs.harvard.edu/abs/2021MNRAS.tmp..971C/abstract
+
+<a id="2">Cardiel et al. (2021b)</a>, MNRAS, in preparation
