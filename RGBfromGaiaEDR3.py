@@ -37,6 +37,7 @@ import urllib
 
 MAX_SEARCH_RADIUS = 30  # degrees
 EDR3_SOURCE_ID_15M_ALLSKY = 'edr3_source_id_15M_allsky.fits'
+RGB_FROM_GAIA_ALLSKY = 'rgb_from_gaia_allsky.fits'
 VERSION = 1.0
 
 
@@ -53,6 +54,8 @@ def main():
                         type=float, default=8.0)
     parser.add_argument("--noplot", help="skip PDF chart generation", action="store_true")
     parser.add_argument("--nocolor", help="do not use colors in PDF chart", action="store_true")
+    parser.add_argument("--starhorse", help="include StarHorse av50, met50 and dist50 in rgbsearch_15m.csv",
+                        action="store_true")
     parser.add_argument("--verbose", help="increase program verbosity", action="store_true")
 
     args = parser.parse_args()
@@ -70,19 +73,23 @@ def main():
     if args.search_radius > MAX_SEARCH_RADIUS:
         raise SystemExit(f'ERROR: search radius must be <= {MAX_SEARCH_RADIUS} degrees')
 
-    # check whether the FITS file containing the source_id of the 15M star sample exists
-    if os.path.isfile(EDR3_SOURCE_ID_15M_ALLSKY):
+    # check whether the auxiliary FITS binary table exists
+    if args.starhorse:
+        auxbintable = RGB_FROM_GAIA_ALLSKY
+    else:
+        auxbintable = EDR3_SOURCE_ID_15M_ALLSKY
+    if os.path.isfile(auxbintable):
         pass
     else:
-        urldir = f'http://nartex.fis.ucm.es/~ncl/rgbphot/gaia/{EDR3_SOURCE_ID_15M_ALLSKY}'
+        urldir = f'http://nartex.fis.ucm.es/~ncl/rgbphot/gaia/{auxbintable}'
         sys.stdout.write(f'Downloading {urldir}... (please wait)')
         sys.stdout.flush()
-        urllib.request.urlretrieve(urldir, EDR3_SOURCE_ID_15M_ALLSKY)
+        urllib.request.urlretrieve(urldir, auxbintable)
         print(' ...OK!')
 
     # read the previous file
     try:
-        with fits.open(EDR3_SOURCE_ID_15M_ALLSKY) as hdul_table:
+        with fits.open(auxbintable) as hdul_table:
             edr3_source_id_15M_allsky = hdul_table[1].data.source_id
     except FileNotFoundError:
         raise SystemExit(f'ERROR: unexpected problem while reading {EDR3_SOURCE_ID_15M_ALLSKY}')
@@ -114,8 +121,6 @@ def main():
     AND phot_g_mean_mag IS NOT NULL 
     AND phot_bp_mean_mag IS NOT NULL 
     AND phot_rp_mean_mag IS NOT NULL
-    AND phot_bp_mean_mag - phot_rp_mean_mag > -0.5
-    AND phot_bp_mean_mag - phot_rp_mean_mag < 2.0
     AND phot_g_mean_mag < {args.g_limit}
     
     ORDER BY ra
@@ -124,8 +129,18 @@ def main():
     sys.stdout.flush()
     job = Gaia.launch_job_async(query)
     r_edr3 = job.get_results()
+    # compute G_BP - G_RP colour
+    r_edr3.add_column(
+        Column(r_edr3['phot_bp_mean_mag'] - r_edr3['phot_rp_mean_mag'],
+               name='bp_rp', unit=u.mag)
+    )
+    # colour cut in BP-RP
+    mask_colour = np.logical_or((r_edr3['bp_rp'] <= -0.5), (r_edr3['bp_rp'] >= 2.0))
+    r_edr3_colorcut = r_edr3[mask_colour]
     nstars = len(r_edr3)
     print(f'        --> {nstars} stars found')
+    nstars_colorcut = len(r_edr3_colorcut)
+    print(f'        --> {nstars_colorcut} stars outside -0.5 < G_BP-G_RP < 2.0')
     if nstars == 0:
         raise SystemExit('ERROR: no stars found. Change search parameters!')
     if args.verbose:
@@ -216,12 +231,7 @@ def main():
 
     sys.stdout.write('<STEP5> Computing RGB magnitudes...')
     sys.stdout.flush()
-    # compute G_BP - G_RP colour and predict RGB magnitudes
-    r_edr3.add_column(
-        Column(r_edr3['phot_bp_mean_mag'] - r_edr3['phot_rp_mean_mag'],
-               name='bp_rp', unit=u.mag)
-    )
-
+    # predict RGB magnitudes
     coef_B = np.array([-0.13748689, 0.44265552, 0.37878846, -0.14923841, 0.09172474, -0.02594726])
     coef_G = np.array([-0.02330159, 0.12884074, 0.22149167, -0.1455048, 0.10635149, -0.0236399])
     coef_R = np.array([0.10979647, -0.14579334, 0.10747392, -0.1063592, 0.08494556, -0.01368962])
@@ -330,10 +340,16 @@ def main():
         cmap = plt.cm.get_cmap('jet')
         sc = ax.scatter(x_pix[iok], y_pix[iok], marker='*',
                         edgecolors='black', linewidth=0.2, s=symbol_size[iok],
-                        cmap=cmap, c=r_edr3[iok]['bp_rp'])
+                        cmap=cmap, c=r_edr3[iok]['bp_rp'], vmin=-0.5, vmax=2.0)
         ax.scatter(x_pix[~iok], y_pix[~iok], marker='.',
                    edgecolors='black', linewidth=0.2, s=symbol_size[~iok],
-                   cmap=cmap, c=r_edr3[~iok]['bp_rp'])
+                   cmap=cmap, c=r_edr3[~iok]['bp_rp'], vmin=-0.5, vmax=2.0)
+
+    # stars outside the -0.5 < G_BP - G_RP < 2.0 colour cut
+    if nstars_colorcut > 0:
+        mask_colour = np.logical_or((r_edr3['bp_rp'] <= -0.5), (r_edr3['bp_rp'] >= 2.0))
+        iok = np.argwhere(mask_colour)
+        ax.scatter(x_pix[iok], y_pix[iok], s=240, marker='D', facecolors='none', edgecolors='magenta', linewidth=0.5)
 
     # variable stars
     if nvariables > 0:
@@ -355,6 +371,10 @@ def main():
                transform=ax.transAxes)
     ax.text(0.06, 0.92, 'variable in Gaia DR2', fontsize=12, backgroundcolor='white',
             horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+    ax.scatter(0.03, 0.88, s=240, marker='D', facecolors='white', edgecolors='magenta', linewidth=0.5,
+               transform=ax.transAxes)
+    ax.text(0.06, 0.88, 'outside colour range', fontsize=12, backgroundcolor='white',
+            horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
 
     ax.set_xlabel('ra')
     ax.set_ylabel('dec')
@@ -363,7 +383,7 @@ def main():
 
     if not args.nocolor:
         cbaxes = fig.add_axes([0.683, 0.81, 0.15, 0.02])
-        cbar = plt.colorbar(sc, cax=cbaxes, orientation='horizontal', format='%3.1f')
+        cbar = plt.colorbar(sc, cax=cbaxes, orientation='horizontal', format='%1.0f')
         cbar.ax.tick_params(labelsize=12)
         cbar.set_label(label=r'$G_{\rm BP}-G_{\rm RP}$', size=12, backgroundcolor='white')
 
