@@ -57,6 +57,7 @@ def main():
     parser.add_argument("--starhorse", help="include StarHorse av50, met50 and dist50 in rgbsearch_15m.csv",
                         action="store_true")
     parser.add_argument("--verbose", help="increase program verbosity", action="store_true")
+    parser.add_argument("--debug", help="debug flag", action="store_true")
 
     args = parser.parse_args()
 
@@ -91,6 +92,18 @@ def main():
     try:
         with fits.open(auxbintable) as hdul_table:
             edr3_source_id_15M_allsky = hdul_table[1].data.source_id
+            if args.starhorse:
+                edr3_b_rgb_15M_allsky = hdul_table[1].data.B_rgb
+                edr3_g_rgb_15M_allsky = hdul_table[1].data.G_rgb
+                edr3_r_rgb_15M_allsky = hdul_table[1].data.R_rgb
+                edr3_g_br_rgb_15M_allsky = hdul_table[1].data.G_BR_rgb
+                edr3_g_gaia_15M_allsky = hdul_table[1].data.G_gaia
+                edr3_bp_gaia_15M_allsky = hdul_table[1].data.BP_gaia
+                edr3_rp_gaia_15M_allsky = hdul_table[1].data.RP_gaia
+                edr3_av50_15M_allsky = hdul_table[1].data.av50
+                edr3_met50_15M_allsky = hdul_table[1].data.met50
+                edr3_dist50_15M_allsky = hdul_table[1].data.dist50
+
     except FileNotFoundError:
         raise SystemExit(f'ERROR: unexpected problem while reading {EDR3_SOURCE_ID_15M_ALLSKY}')
 
@@ -108,6 +121,8 @@ def main():
     wcs_image.array_shape = [naxis1, naxis2]
     if args.verbose:
         print(wcs_image)
+
+    # ---
 
     # EDR3 query
     query = f"""
@@ -146,6 +161,8 @@ def main():
     if args.verbose:
         r_edr3.pprint(max_width=1000)
 
+    # ---
+
     # intersection with 15M star sample
     sys.stdout.write('<STEP2> Cross-matching EDR3 with 15M subsample... (please wait)')
     sys.stdout.flush()
@@ -155,6 +172,8 @@ def main():
     print(f'\n        --> {len(intersection)} stars in common with 15M sample')
     if args.verbose:
         print(len(set1), len(set2), len(intersection))
+
+    # ---
 
     # DR2 query to identify variable stars
     query = f"""
@@ -186,6 +205,8 @@ def main():
     if nvariables > 0:
         if args.verbose:
             r_dr2[mask_var].pprint(max_width=1000)
+
+    # ---
 
     # cross-match between DR2 and EDR3 to identify the variable stars
     dumstr = '('
@@ -229,6 +250,8 @@ def main():
         r_cross_var = None  # Avoid PyCharm warning
     print(f'        --> {nvariables} variable(s) in selected EDR3 star sample')
 
+    # ---
+
     sys.stdout.write('<STEP5> Computing RGB magnitudes...')
     sys.stdout.flush()
     # predict RGB magnitudes
@@ -262,6 +285,8 @@ def main():
     if args.verbose:
         r_edr3.pprint(max_width=1000)
 
+    # ---
+
     sys.stdout.write('<STEP6> Saving output CSV files...')
     sys.stdout.flush()
     outtypes = ['edr3', '15m', 'var']
@@ -274,7 +299,10 @@ def main():
                 os.remove(file)
             except:
                 print(f'ERROR: while deleting existing file {file}')
-    # columns to be saved (label:format)
+    # columns to be saved (use a list to guarantee the same order)
+    outcolumns_list = ['source_id', 'ra', 'dec', 'b_rgb', 'g_rgb', 'r_rgb', 'g_br_rgb',
+                       'phot_g_mean_mag', 'phot_bp_mean_mag', 'phot_rp_mean_mag']
+    # define column format with a dictionary
     outcolumns = {'source_id': '19d',
                   'ra': '14.9f',
                   'dec': '14.9f',
@@ -286,16 +314,25 @@ def main():
                   'phot_bp_mean_mag': '8.4f',
                   'phot_rp_mean_mag': '8.4f'
                   }
-    csv_header = ','.join(outcolumns.keys())
+    if set(outcolumns_list) != set(outcolumns.keys()):
+        raise SystemExit('ERROR: check outcolumns_list and outcolumns')
+    csv_header = ','.join(outcolumns_list)
     flist = []
     for ftype in outtypes:
         f = open(f'{args.basename}_{ftype}.csv', 'wt')
         flist.append(f)
-        f.write(csv_header + '\n')
+        if args.starhorse and ftype == '15m':
+            if args.debug:
+                f.write(csv_header + ',av50,met50,dist50,b_rgb2,g_rgb2,r_rgb2,g_br_rgb2,' +
+                        'phot_g_mean_mag2,phot_bp_mean_mag2,phot_rp_mean_mag2\n')
+            else:
+                f.write(csv_header + ',av50,met50,dist50\n')
+        else:
+            f.write(csv_header + '\n')
     # save each star in its corresponding output file
     for row in r_edr3:
         cout = []
-        for item in outcolumns.keys():
+        for item in outcolumns_list:
             cout.append(eval("f'{row[item]:" + f'{outcolumns[item]}' + "}'"))
         iout = 0
         if nvariables > 0:
@@ -304,6 +341,19 @@ def main():
         if iout == 0:
             if row['source_id'] in intersection:
                 iout = 1
+                if args.starhorse:
+                    iloc = np.argwhere(edr3_source_id_15M_allsky == row['source_id'])[0][0]
+                    cout.append(f"{edr3_av50_15M_allsky[iloc]:7.3f}")
+                    cout.append(f"{edr3_met50_15M_allsky[iloc]:7.3f}")
+                    cout.append(f"{edr3_dist50_15M_allsky[iloc]:7.3f}")
+                    if args.debug:
+                        cout.append(f"{edr3_b_rgb_15M_allsky[iloc]:6.2f}")
+                        cout.append(f"{edr3_g_rgb_15M_allsky[iloc]:6.2f}")
+                        cout.append(f"{edr3_r_rgb_15M_allsky[iloc]:6.2f}")
+                        cout.append(f"{edr3_g_br_rgb_15M_allsky[iloc]:6.2f}")
+                        cout.append(f"{edr3_g_gaia_15M_allsky[iloc]:8.4f}")
+                        cout.append(f"{edr3_bp_gaia_15M_allsky[iloc]:8.4f}")
+                        cout.append(f"{edr3_rp_gaia_15M_allsky[iloc]:8.4f}")
         flist[iout].write(','.join(cout) + '\n')
     for f in flist:
         f.close()
@@ -319,6 +369,7 @@ def main():
     # generate plot
     r_edr3.sort('phot_g_mean_mag')
     if args.verbose:
+        print('')
         r_edr3.pprint(max_width=1000)
 
     symbol_size = (50 / np.array(r_edr3['phot_g_mean_mag'])) ** 2.5
@@ -406,7 +457,11 @@ def main():
 
     plt.savefig(f'{args.basename}.pdf')
     plt.close(fig)
-    print('OK')
+    if args.verbose:
+        pass
+    else:
+        print('OK')
+
 
 if __name__ == "__main__":
 
