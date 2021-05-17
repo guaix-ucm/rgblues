@@ -88,6 +88,13 @@ The script executes the following steps:
     - `phot_rp_mean_mag`: *Gaia* G_RP magnitude (EDR3)
 
   The list of objects in those files is sorted by right ascension.
+
+  When using `--starhorse`, the file `rgbsearch_15m.csv` contains 3 additional
+  columns providing parameters derived by [Anders et al. (2019)](#2):
+
+    - `av50`: 50th percentile of the interstellar extinction 
+    - `met50`: 50th percentile of the metallicity [M/H]
+    - `dist50`: 50th percentile of the distance (kpc)
     
 - Step 7: generation of a finding chart plot (in PDF format): `rgbsearch.pdf`. The execution of the previous example generates a cone search around 
   the Pleiades star cluster:
@@ -129,10 +136,14 @@ optional arguments:
                         with star symbols (default=8.0)
   --noplot              skip PDF chart generation
   --nocolor             do not use colors in PDF chart
+  --starhorse           include StarHorse av50, met50 and dist50 in rgbsearch_15m.csv
   --verbose             increase program verbosity
+  --debug               debug flag
 ```
 
 ## Citation
 If you find this Python script useful, please cite:
+
+<a id="2">Anders et al. (2018)</a>, https://ui.adsabs.harvard.edu/abs/2019A%26A...628A..94A/abstract
 
 <a id="1">Cardiel et al. (2021)</a>, MNRAS, in preparation
