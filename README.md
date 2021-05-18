@@ -15,18 +15,53 @@ package of astropy.
 You need to have a live connection to the Internet for 
 the script to work!
 
-## Downloading and executing the code
+## Installing the code
 
-In order to keep everything as simple as possible, this code does not need 
-any particular installation. Simply download the script and execute it from 
-the command line:
+In order to keep your current Python installation clean, it is highly recommended to install a python 3 
+*virtual environment* and install all the dependencies there.
+
+### Creating and activating the python virtual environment
+
+```bash
+python3 -m venv venv_rgb
+. venv_rgb/bin/activate
+```
+
+### Downloading custom repos
+
+We have experienced problems installing `pyvo` from pypi. However, downloading the latest version from GitHub worked fine
+
+```bash
+(venv_rgb) $ mkdir venb_rgb/repos/
+(venv_rgb) $ cd venb_rgb/repos/
+(venv_rgb) repos$ git clone git@github.com:astropy/pyvo.git
+(venv_rgb) repos$ cd pyvo
+(venv_rgb) pyvo$ python setup.py install
+```
+
+### Installing additional packages
+
+```bash
+(venv_rgb) $ cd
+(venv_rgb) $ pip install astroquery matplotlib
+```
+
+## Downloading and executing the code
+```bash
+(venv_rgb) $ mkdir venb_rgb/repos/
+(venv_rgb) $ cd venb_rgb/repos/
+(venv_rgb) repos$ git clone https://github.com/nicocardiel/RGBfromGaiaEDR3.git
+(venv_rgb) repos$ cd RGBfromGaiaEDR3
+```
+
+Besides the dependencies listed above, this script itself does not need further installation. 
+Just execute it from the command line:
 
 ```buildoutcfg
-$ git clone https://github.com/nicocardiel/RGBfromGaiaEDR3.git
-
-$ cd RGBfromGaiaEDR3
+(venv_rgb) repos$ cd RGBfromGaiaEDR3
 $ python RGBfromGaiaEDR3.py 56.66 24.10 1.0 12
 ```
+
 The last instruction executes the `RGBfromGaiaEDR3.py`script providing the 
 four positional arguments: right ascension, declination, search radius and 
 limiting *Gaia* G magnitude. *Note that the coordinates and search radius 
@@ -67,7 +102,7 @@ The script executes the following steps:
 
     - `rgbsearch_15m.csv`: stars belonging to the ~15 million star sample 
       of C21 (with reliable RGB magnitude estimates).
-      
+
     - `rgbsearch_var.csv`: objects flagged as variable in DR2.
     
     - `rgbsearch_edr3.csv`: remaining objects in EDR3. The RGB magnitude 
