@@ -23,8 +23,8 @@ In order to keep your current Python installation clean, it is highly recommende
 ### Creating and activating the python virtual environment
 
 ```bash
-python3 -m venv venv_rgb
-. venv_rgb/bin/activate
+$ python3 -m venv venv_rgb
+$ . venv_rgb/bin/activate
 ```
 
 ### Downloading custom repos
@@ -42,8 +42,8 @@ We have experienced problems installing `pyvo` from pypi. However, downloading t
 ### Installing additional packages
 
 ```bash
-(venv_rgb) $ cd ..
-(venv_rgb) $ pip install astroquery matplotlib
+(venv_rgb) pyvo$ cd ..
+(venv_rgb) repos$ pip install astroquery matplotlib
 ```
 
 ## Downloading and executing the code
@@ -57,7 +57,7 @@ Just execute it from the command line:
 
 ```buildoutcfg
 (venv_rgb) repos$ cd RGBfromGaiaEDR3
-$ python RGBfromGaiaEDR3.py 56.66 24.10 1.0 12
+(venv_rgb) RGBfromGaiaEDR3$ python RGBfromGaiaEDR3.py 56.66 24.10 1.0 12
 ```
 
 The last instruction executes the `RGBfromGaiaEDR3.py`script providing the 
