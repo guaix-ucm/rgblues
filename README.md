@@ -32,8 +32,8 @@ python3 -m venv venv_rgb
 We have experienced problems installing `pyvo` from pypi. However, downloading the latest version from GitHub worked fine
 
 ```bash
-(venv_rgb) $ mkdir venb_rgb/repos/
-(venv_rgb) $ cd venb_rgb/repos/
+(venv_rgb) $ mkdir venv_rgb/repos/
+(venv_rgb) $ cd venv_rgb/repos/
 (venv_rgb) repos$ git clone git@github.com:astropy/pyvo.git
 (venv_rgb) repos$ cd pyvo
 (venv_rgb) pyvo$ python setup.py install
@@ -42,14 +42,12 @@ We have experienced problems installing `pyvo` from pypi. However, downloading t
 ### Installing additional packages
 
 ```bash
-(venv_rgb) $ cd
+(venv_rgb) $ cd ..
 (venv_rgb) $ pip install astroquery matplotlib
 ```
 
 ## Downloading and executing the code
 ```bash
-(venv_rgb) $ mkdir venb_rgb/repos/
-(venv_rgb) $ cd venb_rgb/repos/
 (venv_rgb) repos$ git clone https://github.com/nicocardiel/RGBfromGaiaEDR3.git
 (venv_rgb) repos$ cd RGBfromGaiaEDR3
 ```
