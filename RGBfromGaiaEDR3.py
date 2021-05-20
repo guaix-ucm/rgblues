@@ -20,7 +20,7 @@ import argparse
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
-from astropy.table import Column
+from astropy.table import Column, vstack, join
 from astropy.wcs import WCS
 from astroquery.gaia import Gaia
 import glob
@@ -31,13 +31,14 @@ mpl.rcParams['font.family'] = 'serif'
 mpl.rcParams['axes.linewidth'] = 2
 import numpy as np
 from numpy.polynomial import Polynomial
+import pyvo
+import requests
 import os
 import sys
 import urllib
 
 MAX_SEARCH_RADIUS = 30  # degrees
 EDR3_SOURCE_ID_15M_ALLSKY = 'edr3_source_id_15M_allsky.fits'
-EDR3_SOURCE_ID_PARAMS_15M_ALLSKY = 'edr3_source_id_params_15M_allsky.fits'
 RGB_FROM_GAIA_ALLSKY = 'rgb_from_gaia_allsky.fits'
 VERSION = 1.0
 
@@ -58,8 +59,8 @@ def main():
     parser.add_argument("--nonumbers", help="do not display star numbers in PDF chart", action="store_true")
     parser.add_argument("--noplot", help="skip PDF chart generation", action="store_true")
     parser.add_argument("--nocolor", help="do not use colors in PDF chart", action="store_true")
-    parser.add_argument("--starhorse", help="include StarHorse av50, met50 and dist50 in rgbsearch_15m.csv",
-                        action="store_true")
+    parser.add_argument("--starhorse_block", help="number of stars/query (default=0, no query)",
+                        default=0, type=int)
     parser.add_argument("--verbose", help="increase program verbosity", action="store_true")
     parser.add_argument("--debug", help="debug flag", action="store_true")
 
@@ -79,11 +80,8 @@ def main():
         raise SystemExit(f'ERROR: search radius must be <= {MAX_SEARCH_RADIUS} degrees')
 
     # check whether the auxiliary FITS binary table exists
-    if args.starhorse:
-        if args.debug:
-            auxbintable = RGB_FROM_GAIA_ALLSKY
-        else:
-            auxbintable = EDR3_SOURCE_ID_PARAMS_15M_ALLSKY
+    if args.debug:
+        auxbintable = RGB_FROM_GAIA_ALLSKY
     else:
         auxbintable = EDR3_SOURCE_ID_15M_ALLSKY
     if os.path.isfile(auxbintable):
@@ -99,19 +97,17 @@ def main():
     try:
         with fits.open(auxbintable) as hdul_table:
             edr3_source_id_15M_allsky = hdul_table[1].data.source_id
-            if args.starhorse:
+            if args.debug:
+                edr3_b_rgb_15M_allsky = hdul_table[1].data.B_rgb
+                edr3_g_rgb_15M_allsky = hdul_table[1].data.G_rgb
+                edr3_r_rgb_15M_allsky = hdul_table[1].data.R_rgb
+                edr3_g_br_rgb_15M_allsky = hdul_table[1].data.G_BR_rgb
+                edr3_g_gaia_15M_allsky = hdul_table[1].data.G_gaia
+                edr3_bp_gaia_15M_allsky = hdul_table[1].data.BP_gaia
+                edr3_rp_gaia_15M_allsky = hdul_table[1].data.RP_gaia
                 edr3_av50_15M_allsky = hdul_table[1].data.av50
                 edr3_met50_15M_allsky = hdul_table[1].data.met50
                 edr3_dist50_15M_allsky = hdul_table[1].data.dist50
-                if args.debug:
-                    edr3_b_rgb_15M_allsky = hdul_table[1].data.B_rgb
-                    edr3_g_rgb_15M_allsky = hdul_table[1].data.G_rgb
-                    edr3_r_rgb_15M_allsky = hdul_table[1].data.R_rgb
-                    edr3_g_br_rgb_15M_allsky = hdul_table[1].data.G_BR_rgb
-                    edr3_g_gaia_15M_allsky = hdul_table[1].data.G_gaia
-                    edr3_bp_gaia_15M_allsky = hdul_table[1].data.BP_gaia
-                    edr3_rp_gaia_15M_allsky = hdul_table[1].data.RP_gaia
-
     except FileNotFoundError:
         raise SystemExit(f'ERROR: unexpected problem while reading {EDR3_SOURCE_ID_15M_ALLSKY}')
 
@@ -171,8 +167,68 @@ def main():
 
     # ---
 
+    # intersection with StarHorse star sample
+    if args.starhorse_block > 0:
+        param_starhorse = [
+            'dr3_source_id', 'sh_gaiaflag', 'sh_outflag',
+            'dist05', 'dist16', 'dist50', 'dist84', 'dist95',
+            'av05', 'av16', 'av50', 'av84', 'av95',
+            'teff16', 'teff50', 'teff84',
+            'logg16', 'logg50', 'logg84',
+            'met16', 'met50', 'met84',
+            'mass16', 'mass50', 'mass84',
+            'xgal', 'ygal', 'zgal', 'rgal',
+            'ruwe', 'angular_distance', 'magnitude_difference',
+            'proper_motion_propagation', 'dup_max_number'
+        ]
+        print('<STEP2> Retrieving StarHorse data from Gaia@AIP... (please wait)')
+        print(f'        pyvo version {pyvo.__version__}')
+        print(f'        TAP service GAIA@AIP')
+        nstars_per_block = args.starhorse_block
+        nblocks = int(nstars / nstars_per_block)
+        r_starhorse = None
+        if nstars - nblocks * nstars_per_block > 0:
+            nblocks +=1
+        for iblock in range(nblocks):
+            irow1 = iblock * nstars_per_block
+            irow2 = min(irow1+nstars_per_block, nstars)
+            print(f'        Starting query #{iblock+1} of {nblocks}...')
+            dumstr = ','.join([str(item) for item in r_edr3[irow1:irow2]['source_id']])
+            query = f"""
+            SELECT {','.join(param_starhorse)}
+            FROM gaiadr2_contrib.starhorse
+            WHERE dr3_source_id IN ({dumstr})
+            """
+            tap_session = requests.Session()
+            tap_session.headers['Authorization'] = "kkk"
+            tap_service = pyvo.dal.TAPService('https://gaia.aip.de/tap', session=tap_session)
+            tap_result = tap_service.run_sync(query)
+            if args.debug:
+                print(tap_result.to_table())
+            if iblock == 0:
+                r_starhorse = tap_result.to_table()
+            else:
+                r_starhorse = vstack([r_starhorse, tap_result.to_table()],
+                                     join_type='exact', metadata_conflicts='silent')
+
+        if args.verbose:
+            r_starhorse.pprint(max_width=1000)
+
+        # join tables
+        print('        Joining EDR3 and StarHorse queries...')
+        r_starhorse.rename_column('dr3_source_id', 'source_id')
+        r_edr3 = join(r_edr3, r_starhorse, keys='source_id', join_type='outer')
+        r_edr3.sort('ra')
+        if args.verbose:
+            r_edr3.pprint(max_width=1000)
+
+    else:
+        print('<STEP2> Retrieving StarHorse data from Gaia@AIP... (skipped!)')
+
+    # ---
+
     # intersection with 15M star sample
-    sys.stdout.write('<STEP2> Cross-matching EDR3 with 15M subsample... (please wait)')
+    sys.stdout.write('<STEP3> Cross-matching EDR3 with 15M subsample... (please wait)')
     sys.stdout.flush()
     set1 = set(np.array(r_edr3['source_id']))
     set2 = set(edr3_source_id_15M_allsky)
@@ -193,7 +249,7 @@ def main():
       CIRCLE('ICRS',ra, dec, {args.search_radius}))
     AND phot_g_mean_mag < {args.g_limit}
     """
-    sys.stdout.write('<STEP3> Looking for variable stars in Gaia DR2... (please wait)\n  ')
+    sys.stdout.write('<STEP4> Looking for variable stars in Gaia DR2... (please wait)\n  ')
     sys.stdout.flush()
     job = Gaia.launch_job_async(query)
     r_dr2 = job.get_results()
@@ -220,19 +276,15 @@ def main():
     dumstr = '('
     if nvariables > 0:
         # generate sequence of source_id of variable stars
-        for i, item in enumerate(r_dr2[mask_var]['source_id']):
-            if i > 0:
-                dumstr += ', '
-            dumstr += f'{item}'
-        dumstr += ')'
+        dumstr = ','.join([str(item) for item in r_dr2[mask_var]['source_id']])
         # cross-match
         query = f"""
         SELECT *
         FROM gaiaedr3.dr2_neighbourhood
-        WHERE dr2_source_id IN {dumstr}
+        WHERE dr2_source_id IN ({dumstr})
         ORDER BY angular_distance
         """
-        sys.stdout.write('<STEP4> Cross-matching variables in DR2 with stars in EDR3... (please wait)\n  ')
+        sys.stdout.write('<STEP5> Cross-matching variables in DR2 with stars in EDR3... (please wait)\n  ')
         sys.stdout.flush()
         job = Gaia.launch_job_async(query)
         r_cross_var = job.get_results()
@@ -260,7 +312,7 @@ def main():
 
     # ---
 
-    sys.stdout.write('<STEP5> Computing RGB magnitudes...')
+    sys.stdout.write('<STEP6> Computing RGB magnitudes...')
     sys.stdout.flush()
     # predict RGB magnitudes
     coef_B = np.array([-0.13748689, 0.44265552, 0.37878846, -0.14923841, 0.09172474, -0.02594726])
@@ -295,7 +347,7 @@ def main():
 
     # ---
 
-    sys.stdout.write('<STEP6> Saving output CSV files...')
+    sys.stdout.write('<STEP7> Saving output CSV files...')
     sys.stdout.flush()
     outtypes = ['edr3', '15m', 'var']
     outtypes_color = {'edr3': 'black', '15m': 'red', 'var': 'blue'}
@@ -333,14 +385,13 @@ def main():
     for ftype in outtypes:
         f = open(f'{args.basename}_{ftype}.csv', 'wt')
         flist.append(f)
-        if args.starhorse and ftype == '15m':
-            if args.debug:
-                f.write(csv_header + ',av50,met50,dist50,b_rgb2,g_rgb2,r_rgb2,g_br_rgb2,' +
-                        'phot_g_mean_mag2,phot_bp_mean_mag2,phot_rp_mean_mag2\n')
-            else:
-                f.write(csv_header + ',av50,met50,dist50\n')
-        else:
-            f.write(csv_header + '\n')
+        if (args.starhorse_block > 0) and (ftype in ['edr3', '15m']):
+            csv_header += ',av50,met50,dist50'
+            if args.debug and (ftype == '15m'):
+                csv_header += ',b_rgb_bis,g_rgb_bis,r_rgb_bis,g_br_rgb_bis,' \
+                              'phot_g_mean_mag_bis,phot_bp_mean_mag_bis,phot_rp_mean_mag_bis,' \
+                              'av50_bis,met50_bis,dist50_bis'
+        f.write(csv_header + '\n')
     # save each star in its corresponding output file
     krow = np.ones(len(outtypes), dtype=int)
     for irow, row in enumerate(r_edr3):
@@ -352,21 +403,28 @@ def main():
             if row['source_id'] in r_cross_var['dr3_source_id']:
                 iout = 2
         if iout == 0:
+            if args.starhorse_block > 0:
+                for item in ['av50', 'met50', 'dist50']:
+                    value = row[item]
+                    if isinstance(value, float):
+                        pass
+                    else:
+                        value = 99.999
+                    cout.append(f'{value:7.3f}')
             if row['source_id'] in intersection:
                 iout = 1
-                if args.starhorse:
+                if args.debug:
                     iloc = np.argwhere(edr3_source_id_15M_allsky == row['source_id'])[0][0]
+                    cout.append(f"{edr3_b_rgb_15M_allsky[iloc]:6.2f}")
+                    cout.append(f"{edr3_g_rgb_15M_allsky[iloc]:6.2f}")
+                    cout.append(f"{edr3_r_rgb_15M_allsky[iloc]:6.2f}")
+                    cout.append(f"{edr3_g_br_rgb_15M_allsky[iloc]:6.2f}")
+                    cout.append(f"{edr3_g_gaia_15M_allsky[iloc]:8.4f}")
+                    cout.append(f"{edr3_bp_gaia_15M_allsky[iloc]:8.4f}")
+                    cout.append(f"{edr3_rp_gaia_15M_allsky[iloc]:8.4f}")
                     cout.append(f"{edr3_av50_15M_allsky[iloc]:7.3f}")
                     cout.append(f"{edr3_met50_15M_allsky[iloc]:7.3f}")
                     cout.append(f"{edr3_dist50_15M_allsky[iloc]:7.3f}")
-                    if args.debug:
-                        cout.append(f"{edr3_b_rgb_15M_allsky[iloc]:6.2f}")
-                        cout.append(f"{edr3_g_rgb_15M_allsky[iloc]:6.2f}")
-                        cout.append(f"{edr3_r_rgb_15M_allsky[iloc]:6.2f}")
-                        cout.append(f"{edr3_g_br_rgb_15M_allsky[iloc]:6.2f}")
-                        cout.append(f"{edr3_g_gaia_15M_allsky[iloc]:8.4f}")
-                        cout.append(f"{edr3_bp_gaia_15M_allsky[iloc]:8.4f}")
-                        cout.append(f"{edr3_rp_gaia_15M_allsky[iloc]:8.4f}")
         flist[iout].write(f'{krow[iout]:6d}, ' + ','.join(cout) + '\n')
         r_edr3[irow]['number_csv'] = iout
         r_edr3[irow][f'number_{outtypes[iout]}'] = krow[iout]
@@ -383,7 +441,7 @@ def main():
 
     # ---
 
-    sys.stdout.write('<STEP7> Generating PDF plot...')
+    sys.stdout.write('<STEP8> Generating PDF plot...')
     sys.stdout.flush()
     # generate plot
     r_edr3.sort('phot_g_mean_mag')
