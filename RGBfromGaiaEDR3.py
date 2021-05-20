@@ -211,10 +211,13 @@ def main():
                 r_starhorse = vstack([r_starhorse, tap_result.to_table()],
                                      join_type='exact', metadata_conflicts='silent')
 
+        nstars_starhorse = len(r_starhorse)
         if args.verbose:
-            r_starhorse.pprint(max_width=1000)
+            if nstars_starhorse > 0:
+                r_starhorse.pprint(max_width=1000)
 
         # join tables
+        print(f'        --> {nstars_starhorse} stars found in StarHorse')
         print('        Joining EDR3 and StarHorse queries...')
         r_starhorse.rename_column('dr3_source_id', 'source_id')
         r_edr3 = join(r_edr3, r_starhorse, keys='source_id', join_type='outer')
@@ -456,7 +459,7 @@ def main():
     c = SkyCoord(ra=ra_array * u.degree, dec=dec_array * u.degree, frame='icrs')
     x_pix, y_pix = wcs_image.world_to_pixel(c)
 
-    fig = plt.figure(figsize=(11, 10))
+    fig = plt.figure(figsize=(13, 10))
     ax = plt.subplot(projection=wcs_image)
     iok = r_edr3['phot_g_mean_mag'] < args.brightlimit
     if args.nocolor:
@@ -533,14 +536,22 @@ def main():
             horizontalalignment='right', verticalalignment='center', transform=ax.transAxes)
     ax.text(0.02, 0.06, r'$\alpha_{\rm center}$:', fontsize=12, backgroundcolor='white',
             horizontalalignment='left', verticalalignment='bottom', transform=ax.transAxes)
-    ax.text(0.30, 0.06, f'{args.ra_center:.4f} degree', fontsize=12, backgroundcolor='white',
+    ax.text(0.25, 0.06, f'{args.ra_center:.4f} degree', fontsize=12, backgroundcolor='white',
             horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
     ax.text(0.02, 0.02, r'$\delta_{\rm center}$:', fontsize=12, backgroundcolor='white',
             horizontalalignment='left', verticalalignment='bottom', transform=ax.transAxes)
-    ax.text(0.30, 0.02, f'{args.dec_center:+.4f} degree', fontsize=12, backgroundcolor='white',
+    ax.text(0.25, 0.02, f'{args.dec_center:+.4f} degree', fontsize=12, backgroundcolor='white',
             horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
     ax.text(0.98, 0.02, f'RGBfromGaiaEDR3, version {VERSION}', fontsize=12, backgroundcolor='white',
             horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
+
+    f = np.pi / 180
+    xp= naxis1 / 2 + args.search_radius/pixscale * np.cos(np.arange(361)*f)
+    yp= naxis2 / 2 + args.search_radius/pixscale * np.sin(np.arange(361)*f)
+    ax.plot(xp, yp, '-', color='orange', linewidth=0.5, alpha=0.5)
+
+    ax.set_xlim([-naxis1*0.12, naxis1*1.12])
+    ax.set_ylim([-naxis2*0.05, naxis2*1.05])
 
     ax.set_axisbelow(True)
     overlay = ax.get_coords_overlay('icrs')
