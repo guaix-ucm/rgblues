@@ -13,7 +13,7 @@ This code is hosted at https://github.com/nicocardiel/RGBfromGaiaEDR3
 Maintainer: Nicolás Cardiel <cardiel@ucm.es>
 
 Usage example:
-$ python RGBfromGaiaEDR3.py 56.66 24.10 1.0 12
+$ python rgbgaia.py 56.66 24.10 1.0 12
 """
 
 import argparse
@@ -188,7 +188,7 @@ def main():
         nblocks = int(nstars / nstars_per_block)
         r_starhorse = None
         if nstars - nblocks * nstars_per_block > 0:
-            nblocks +=1
+            nblocks += 1
         for iblock in range(nblocks):
             irow1 = iblock * nstars_per_block
             irow2 = min(irow1+nstars_per_block, nstars)
@@ -550,8 +550,8 @@ def main():
             horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
 
     f = np.pi / 180
-    xp= naxis1 / 2 + args.search_radius/pixscale * np.cos(np.arange(361)*f)
-    yp= naxis2 / 2 + args.search_radius/pixscale * np.sin(np.arange(361)*f)
+    xp = naxis1 / 2 + args.search_radius/pixscale * np.cos(np.arange(361)*f)
+    yp = naxis2 / 2 + args.search_radius/pixscale * np.sin(np.arange(361)*f)
     ax.plot(xp, yp, '-', color='orange', linewidth=0.5, alpha=0.5)
 
     ax.set_xlim([-naxis1*0.12, naxis1*1.12])
