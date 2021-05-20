@@ -76,26 +76,33 @@ The script executes the following steps:
 - Step 1: cone search in *Gaia* EDR3, gathering the following parameters: 
   `source_id`, `ra`, `dec`, `phot_g_mean_mag`, `phot_bp_mean_mag` and 
   `phot_rp_mean_mag`.
+
+- Step 2: cone search in StarHorse to retrieve interstellar extinction,
+  metallicity and distance, among other parameters. This step is optional and
+  only executed when `--starhorse_block <number>` is employed (in this case
+  `<number>` is an integer number indicating the number of stars whose
+  parameters are retrieved in each single query to Gaia@AIP; a typical useful 
+  value is 100).
   
-- Step 2: cross-matching of the previous EDR3 sample with the list of ~15 
+- Step 3: cross-matching of the previous EDR3 sample with the list of ~15 
   million stars from C21. This step determines the 
   subsample of EDR3 stars for which the RGB photometric calibration is 
   reliable.
   
-- Step 3: cone search in *Gaia* DR2. This additional step is performed in 
+- Step 4: cone search in *Gaia* DR2. This additional step is performed in 
   order to retrieve the `phot_variable_flag` parameter indicating whether 
   the star was flagged as variable in DR2. Note that this flag is not 
   available in EDR3.
   
-- Step 4: cross-matching between DR2 and EDR3 to identify the variable 
+- Step 5: cross-matching between DR2 and EDR3 to identify the variable 
   stars in EDR3. This step is required because it is not guaranteed that 
   the same astronomical source will always have the same source identifier 
   in the different Gaia Data Releases.
   
-- Step 5: computation of the RGB magnitudes using the polynomial 
+- Step 6: computation of the RGB magnitudes using the polynomial 
   transformations given in Eqs. (2)-(5) of C21.
 
-- Step 6: generation of the output files. Three files (in CSV format) are 
+- Step 7: generation of the output files. Three files (in CSV format) are 
   generated: 
 
     - `rgbsearch_15m.csv`: stars belonging to the ~15 million star sample 
@@ -127,16 +134,20 @@ The script executes the following steps:
 
   The list of objects in those files is sorted by right ascension.
 
-  When using `--starhorse`, the file `rgbsearch_15m.csv` contains 3 additional
+  When using `--starhorse_block <number>`, the files `rgbsearch_15m.csv` and
+  `rgbsearch_edr3.csv` contain 3 additional
   columns providing parameters derived by [Anders et al. (2019)](#3):
 
     - `av50`: 50th percentile of the interstellar extinction 
     - `met50`: 50th percentile of the metallicity [M/H]
     - `dist50`: 50th percentile of the distance (kpc)
 
-- Step 7: generation of a finding chart plot (in PDF format): `rgbsearch.pdf`. The execution of the previous example generates a cone search around 
+  These three values are set to 99.999 for those stars that do not belong to
+  the StarHorse sample.
+
+- Step 8: generation of a finding chart plot (in PDF format): `rgbsearch.pdf`. The execution of the previous example generates a cone search around 
   the [Pleiades](https://en.wikipedia.org/wiki/Pleiades) star cluster:
-  ![Pleiades plot](http://nartex.hst.ucm.es/~ncl/rgbphot/gaia/pleiades_v2.png)
+  ![Pleiades plot](http://nartex.hst.ucm.es/~ncl/rgbphot/gaia/pleiades_v3.png)
   The stars in this plot are color coded based on the *Gaia* G_BP - G_RP 
   colour. A red circle has been overplotted on the stars belonging to 
   the ~15 million star sample of C21, a blue square on the variable 
