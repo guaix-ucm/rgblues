@@ -383,17 +383,21 @@ def main():
                   }
     if set(outcolumns_list) != set(outcolumns.keys()):
         raise SystemExit('ERROR: check outcolumns_list and outcolumns')
-    csv_header = 'number,' + ','.join(outcolumns_list)
+    csv_header_ini = 'number,' + ','.join(outcolumns_list)
     flist = []
     for ftype in outtypes:
         f = open(f'{args.basename}_{ftype}.csv', 'wt')
         flist.append(f)
         if (args.starhorse_block > 0) and (ftype in ['edr3', '15m']):
-            csv_header += ',av50,met50,dist50'
             if args.debug and (ftype == '15m'):
-                csv_header += ',b_rgb_bis,g_rgb_bis,r_rgb_bis,g_br_rgb_bis,' \
-                              'phot_g_mean_mag_bis,phot_bp_mean_mag_bis,phot_rp_mean_mag_bis,' \
-                              'av50_bis,met50_bis,dist50_bis'
+                csv_header = csv_header_ini + \
+                             ',av50,met50,dist50,b_rgb_bis,g_rgb_bis,r_rgb_bis,g_br_rgb_bis,' \
+                             'phot_g_mean_mag_bis,phot_bp_mean_mag_bis,phot_rp_mean_mag_bis,' \
+                             'av50_bis,met50_bis,dist50_bis'
+            else:
+                csv_header = csv_header_ini + ',av50,met50,dist50'
+        else:
+            csv_header = csv_header_ini
         f.write(csv_header + '\n')
     # save each star in its corresponding output file
     krow = np.ones(len(outtypes), dtype=int)
