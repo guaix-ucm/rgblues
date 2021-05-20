@@ -191,7 +191,8 @@ optional arguments:
   --nonumbers           do not display star numbers in PDF chart
   --noplot              skip PDF chart generation
   --nocolor             do not use colors in PDF chart
-  --starhorse           include StarHorse av50, met50 and dist50 in rgbsearch_15m.csv
+  --starhorse_block STARHORSE_BLOCK
+                        number of stars/query (default=0, no query)
   --verbose             increase program verbosity
   --debug               debug flag
 ```
