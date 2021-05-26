@@ -17,25 +17,25 @@ $ python rgbgaia.py 56.66 24.10 1.0 12
 """
 
 import argparse
+import glob
+import os
+import sys
+
+import matplotlib.pyplot as plt
+import matplotlib.style
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.table import Column, vstack, join
 from astropy.wcs import WCS
 from astroquery.gaia import Gaia
-import glob
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-mpl.rcParams['font.size'] = 17.0
-mpl.rcParams['font.family'] = 'serif'
-mpl.rcParams['axes.linewidth'] = 2
 import numpy as np
 from numpy.polynomial import Polynomial
 import pyvo
 import requests
-import os
-import sys
-import urllib
+import pooch
+
+from .style import mpl_style
 
 MAX_SEARCH_RADIUS = 30  # degrees
 EDR3_SOURCE_ID_15M_ALLSKY = 'edr3_source_id_15M_allsky.fits'
@@ -82,20 +82,19 @@ def main():
     # check whether the auxiliary FITS binary table exists
     if args.debug:
         auxbintable = RGB_FROM_GAIA_ALLSKY
+        auxhash = "md5:5e42a58471c780ef622d7bd620af3ea2"
     else:
         auxbintable = EDR3_SOURCE_ID_15M_ALLSKY
-    if os.path.isfile(auxbintable):
-        pass
-    else:
-        urldir = f'http://nartex.fis.ucm.es/~ncl/rgbphot/gaia/{auxbintable}'
-        sys.stdout.write(f'Downloading {urldir}... (please wait)')
-        sys.stdout.flush()
-        urllib.request.urlretrieve(urldir, auxbintable)
-        print(' ...OK!')
+        auxhash = "md5:927f0dc8e74562268ee98bb13f6f88e3"
+
+    fauxbin = pooch.retrieve(
+        f"http://nartex.fis.ucm.es/~ncl/rgbphot/gaia/{auxbintable}",
+        known_hash=auxhash
+    )
 
     # read the previous file
     try:
-        with fits.open(auxbintable) as hdul_table:
+        with fits.open(fauxbin) as hdul_table:
             edr3_source_id_15M_allsky = hdul_table[1].data.source_id
             if args.debug:
                 edr3_b_rgb_15M_allsky = hdul_table[1].data.B_rgb
@@ -364,7 +363,7 @@ def main():
         if file in filelist:
             try:
                 os.remove(file)
-            except:
+            except OSError:
                 print(f'ERROR: while deleting existing file {file}')
     # columns to be saved (use a list to guarantee the same order)
     outcolumns_list = ['source_id', 'ra', 'dec', 'b_rgb', 'g_rgb', 'r_rgb', 'g_br_rgb',
@@ -463,6 +462,7 @@ def main():
     c = SkyCoord(ra=ra_array * u.degree, dec=dec_array * u.degree, frame='icrs')
     x_pix, y_pix = wcs_image.world_to_pixel(c)
 
+    matplotlib.style.use(mpl_style)
     fig = plt.figure(figsize=(13, 10))
     ax = plt.subplot(projection=wcs_image)
     iok = r_edr3['phot_g_mean_mag'] < args.brightlimit
