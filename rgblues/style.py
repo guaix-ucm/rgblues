@@ -9,8 +9,10 @@
 """
 RGB predictions of Gaia EDR3 stars
 
-This code is hosted at https://github.com/nicocardiel/RGBfromGaiaEDR3
-Maintainer: Nicolás Cardiel <cardiel@ucm.es>
+This code is hosted at https://github.com/guaix-ucm/rgblues
+Authors: Nicolás Cardiel <cardiel@ucm.es>
+         Sergio Pascual <sergiopr@fis.ucm.es>
+         Rafael González <rafael08@ucm.es>
 
 matplotlib style
 """
