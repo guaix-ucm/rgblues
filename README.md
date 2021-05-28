@@ -1,4 +1,4 @@
-# RGBfromGaiaEDR3
+# rgblues
 
 This Python script predicts RGB magnitudes from *Gaia* EDR3 
 photometric data. These magnitudes are given in the standard system defined by
@@ -17,50 +17,31 @@ the script to work!
 
 ## Installing the code
 
-In order to keep your current Python installation clean, it is highly recommended to install a python 3 
-*virtual environment* and install all the dependencies there.
+In order to keep your current Python installation clean, it is highly 
+recommended to install a python 3 *virtual environment* first.
 
 ### Creating and activating the python virtual environment
 
 ```bash
 $ python3 -m venv venv_rgb
 $ . venv_rgb/bin/activate
+(venv_rgb) $
 ```
 
-### Downloading custom repos
-
-We have experienced problems installing `pyvo` from pypi. However, downloading the latest version from GitHub worked fine
+### Installing the package
 
 ```bash
-(venv_rgb) $ mkdir venv_rgb/repos/
-(venv_rgb) $ cd venv_rgb/repos/
-(venv_rgb) repos$ git clone git@github.com:astropy/pyvo.git
-(venv_rgb) repos$ cd pyvo
-(venv_rgb) pyvo$ python setup.py install
+(venv_rgb) $ pip install git+https://github.com/guaix-ucm/rgblues.git@main#egg=rgblues
 ```
 
-### Installing additional packages
-
-```bash
-(venv_rgb) pyvo$ cd ..
-(venv_rgb) repos$ pip install astroquery matplotlib
-```
-
-## Downloading and executing the code
-```bash
-(venv_rgb) repos$ git clone https://github.com/nicocardiel/RGBfromGaiaEDR3.git
-(venv_rgb) repos$ cd RGBfromGaiaEDR3
-```
-
-Besides the dependencies listed above, this script itself does not need further installation. 
+## Executing the program
 Just execute it from the command line:
 
 ```buildoutcfg
-(venv_rgb) repos$ cd RGBfromGaiaEDR3
-(venv_rgb) RGBfromGaiaEDR3$ python RGBfromGaiaEDR3.py 56.66 24.10 1.0 12
+(venv_rgb) $ rgblues 56.66 24.10 1.0 12
 ```
 
-The last instruction executes the `RGBfromGaiaEDR3.py`script providing the 
+The last instruction executes the program providing the 
 four positional arguments: right ascension, declination, search radius and 
 limiting *Gaia* G magnitude. *Note that the coordinates and search radius 
 must be given in decimal degrees*.
@@ -68,8 +49,8 @@ must be given in decimal degrees*.
 The first time you execute the code, the auxiliary file
 `edr3_source_id_15M_allsky.fits` (size 129 Mb), containing the `source_id`of
 the *Gaia* EDR3 stars belonging to the ~15 million star sample of C21, is
-automatically downloaded. When using the `--starhorse`, a larger file (size
-289Mb), containing additional star parameters, is downloaded instead.
+automatically downloaded to a cache directory (you do not have to worry
+about its location). 
 
 The script executes the following steps:
 
@@ -105,17 +86,17 @@ The script executes the following steps:
 - Step 7: generation of the output files. Three files (in CSV format) are 
   generated: 
 
-    - `rgbsearch_15m.csv`: stars belonging to the ~15 million star sample 
+    - `rgblues_15m.csv`: stars belonging to the ~15 million star sample 
       of C21 (with reliable RGB magnitude estimates).
 
-    - `rgbsearch_var.csv`: objects flagged as variable in DR2.
+    - `rgblues_var.csv`: objects flagged as variable in DR2.
     
-    - `rgbsearch_edr3.csv`: remaining objects in EDR3. The RGB magnitude 
+    - `rgblues_edr3.csv`: remaining objects in EDR3. The RGB magnitude 
       estimates of these objects can be potentially biased due to 
       systematic effects introduced by interstellar extinction, or by 
       exhibiting non-solar metallicity, or a colour outside the *Gaia* -0.5 < 
       G_BP-G_RP < 2.0 interval. This file will typically contain more stars 
-      than the `rgbsearch_15m.csv` selection.
+      than the `rgblues_15m.csv` selection.
       
   The three CSV files provide the same 11 columns:
   
@@ -134,8 +115,8 @@ The script executes the following steps:
 
   The list of objects in those files is sorted by right ascension.
 
-  When using `--starhorse_block <number>`, the files `rgbsearch_15m.csv` and
-  `rgbsearch_edr3.csv` contain 3 additional
+  When using `--starhorse_block <number>`, the files `rgblues_15m.csv` and
+  `rgblues_edr3.csv` contain 3 additional
   columns providing parameters derived by [Anders et al. (2019)](#3):
 
     - `av50`: 50th percentile of the interstellar extinction 
@@ -145,9 +126,10 @@ The script executes the following steps:
   These three values are set to 99.999 for those stars that do not belong to
   the StarHorse sample.
 
-- Step 8: generation of a finding chart plot (in PDF format): `rgbsearch.pdf`. The execution of the previous example generates a cone search around 
+- Step 8: generation of a finding chart plot (in PDF format): `rgblues.pdf`. 
+  The execution of the previous example generates a cone search around 
   the [Pleiades](https://en.wikipedia.org/wiki/Pleiades) star cluster:
-  ![Pleiades plot](http://nartex.hst.ucm.es/~ncl/rgbphot/gaia/pleiades_v3.png)
+  ![Pleiades plot](http://nartex.hst.ucm.es/~ncl/rgbphot/gaia/pleiades_v4.png)
   The stars in this plot are color coded based on the *Gaia* G_BP - G_RP 
   colour. A red circle has been overplotted on the stars belonging to 
   the ~15 million star sample of C21, a blue square on the variable 
@@ -155,13 +137,13 @@ The script executes the following steps:
   -0.5 < G_BP - G_RP < 2.0 colour interval. 
   Stars brighter than a pre-defined threshold are displayed 
   with big star symbols. To facilitate the identification of each star, the
-  consecutive star number in the three files (`rgbsearch_15m.csv`,
-  `rgbsearch_edr3.csv` and `rgbsearch_var.csv`) is also displayed (in red,
+  consecutive star number in the three files (`rgblues_15m.csv`,
+  `rgblues_edr3.csv` and `rgblues_var.csv`) is also displayed (in red,
   black and blue, respectively). These numbers are not displayed when using the
   parameter `--nonumbers` in the command line.
 
 Note that the four output archives (1 PDF and 3 CSV files) share the same root
-name `rgbsearch`. This can be easily modified using the optional argument
+name `rgblues`. This can be easily modified using the optional argument
 `--basename <newbasename>` in the command line.
 
 ### Additional help
@@ -170,7 +152,7 @@ Some auxiliary optional arguments are also available. See description
 invoking the script help:
 
 ```buildoutcfg
-$ python RGBfromGaiaEDR3.py --help
+$ rgblues --help
 
 ...
 ...
@@ -198,7 +180,8 @@ optional arguments:
 ```
 
 ## Citation
-If you find this Python script useful, please cite [Cardiel et al. (2021a)](#1)
+If you find this Python package useful, 
+please cite [Cardiel et al. (2021a)](#1)
 (to quote the use of the standard RGB system)
 and [Cardiel et al. (2021b)](#2) (where the transformation between the *Gaia*
 photometry and the RGB magnitudes is derived).
@@ -206,8 +189,11 @@ photometry and the RGB magnitudes is derived).
 
 ## Bibliography
 
-<a id="3">Anders et al. (2019)</a>, https://ui.adsabs.harvard.edu/abs/2019A%26A...628A..94A/abstract
+<a id="3">Anders et al. (2019)</a>, 
+https://ui.adsabs.harvard.edu/abs/2019A%26A...628A..94A/abstract
 
-<a id="1">Cardiel et al. (2021a)</a>, MNRAS, in press, https://ui.adsabs.harvard.edu/abs/2021MNRAS.tmp..971C/abstract
+<a id="1">Cardiel et al. (2021a)</a>, 
+MNRAS, in press, https://ui.adsabs.harvard.edu/abs/2021MNRAS.tmp..971C/abstract
 
-<a id="2">Cardiel et al. (2021b)</a>, MNRAS, in preparation
+<a id="2">Cardiel et al. (2021b)</a>, 
+MNRAS, in preparation

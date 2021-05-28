@@ -52,7 +52,7 @@ def main():
     parser.add_argument("dec_center", help="declination (decimal degrees)", type=float)
     parser.add_argument("search_radius", help="search radius (decimal degrees)", type=float)
     parser.add_argument("g_limit", help="limiting Gaia G magnitude", type=float)
-    parser.add_argument("--basename", help="file basename for output files", type=str, default="rgbsearch")
+    parser.add_argument("--basename", help="file basename for output files", type=str, default="rgblues")
     parser.add_argument("--brightlimit",
                         help="stars brighter than this Gaia G limit are displayed with star symbols (default=8.0)",
                         type=float, default=8.0)
