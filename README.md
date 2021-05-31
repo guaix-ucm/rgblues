@@ -193,7 +193,7 @@ photometry and the RGB magnitudes is derived).
 https://ui.adsabs.harvard.edu/abs/2019A%26A...628A..94A/abstract
 
 <a id="1">Cardiel et al. (2021a)</a>, 
-MNRAS, in press, https://ui.adsabs.harvard.edu/abs/2021MNRAS.tmp..971C/abstract
+MNRAS, https://ui.adsabs.harvard.edu/abs/2021MNRAS.504.3730C/abstract
 
 <a id="2">Cardiel et al. (2021b)</a>, 
 MNRAS, in preparation
