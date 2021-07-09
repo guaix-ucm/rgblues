@@ -69,33 +69,15 @@ def search_radius(r_str):
     return r
 
 
-def main():
+def exec_rgblues(args):
+    """Callable function that executes all the required steps
 
-    parser = argparse.ArgumentParser(description=f"RGB predictions for Gaia EDR3 stars (version {version})")
-    parser.add_argument("ra_center", help="right Ascension (decimal degrees)", type=right_ascension)
-    parser.add_argument("dec_center", help="declination (decimal degrees)", type=declination)
-    parser.add_argument("search_radius", help="search radius (decimal degrees)", type=search_radius)
-    parser.add_argument("g_limit", help="limiting Gaia G magnitude", type=float)
-    parser.add_argument("--basename", help="file basename for output files", type=str, default="rgblues")
-    parser.add_argument("--brightlimit",
-                        help="stars brighter than this Gaia G limit are displayed with star symbols (default=8.0)",
-                        type=float, default=8.0)
-    parser.add_argument("--symbsize", help="multiplying factor for symbol size (default=1.0)",
-                        type=float, default=1.0)
-    parser.add_argument("--nonumbers", help="do not display star numbers in PDF chart", action="store_true")
-    parser.add_argument("--noplot", help="skip PDF chart generation", action="store_true")
-    parser.add_argument("--nocolor", help="do not use colors in PDF chart", action="store_true")
-    parser.add_argument("--starhorse_block", help="number of stars/query (default=0, no query)",
-                        default=0, type=int)
-    parser.add_argument("--verbose", help="increase program verbosity", action="store_true")
-    parser.add_argument("--debug", help="debug flag", action="store_true")
+    Parameters
+    ----------
+    args: argparse instance
+        Argparse instance containing the command-line parameters
 
-    args = parser.parse_args()
-
-    if len(sys.argv) == 1:
-        parser.print_usage()
-        raise SystemExit()
-
+    """
     print(f'\n        Welcome to rgblues version {version}')
     print(f'        ==============================\n')
 
@@ -186,7 +168,7 @@ def main():
 
     # ---
     # step 7: generate output CSV files
-    outtypes = step7(
+    step7(
         r_edr3,
         args.basename,
         args.starhorse_block,
@@ -203,7 +185,6 @@ def main():
     if args.noplot:
         sys.stdout.write('<STEP8> No PDF plot generated (skipped!)\n')
         sys.stdout.flush()
-        raise SystemExit()
     else:
         step8(
             r_edr3,
@@ -215,7 +196,6 @@ def main():
             args.nonumbers,
             args.nocolor,
             args.basename,
-            outtypes,
             nstars_colorcut,
             nvariables,
             r_cross_var,
@@ -223,6 +203,37 @@ def main():
             version,
             args.verbose
         )
+    print('End of program')
+
+
+def main():
+    """Main function to parse input arguments"""
+    parser = argparse.ArgumentParser(description=f"RGB predictions for Gaia EDR3 stars (version {version})")
+    parser.add_argument("ra_center", help="right Ascension (decimal degrees)", type=right_ascension)
+    parser.add_argument("dec_center", help="declination (decimal degrees)", type=declination)
+    parser.add_argument("search_radius", help="search radius (decimal degrees)", type=search_radius)
+    parser.add_argument("g_limit", help="limiting Gaia G magnitude", type=float)
+    parser.add_argument("--basename", help="file basename for output files", type=str, default="rgblues")
+    parser.add_argument("--brightlimit",
+                        help="stars brighter than this Gaia G limit are displayed with star symbols (default=8.0)",
+                        type=float, default=8.0)
+    parser.add_argument("--symbsize", help="multiplying factor for symbol size (default=1.0)",
+                        type=float, default=1.0)
+    parser.add_argument("--nonumbers", help="do not display star numbers in PDF chart", action="store_true")
+    parser.add_argument("--noplot", help="skip PDF chart generation", action="store_true")
+    parser.add_argument("--nocolor", help="do not use colors in PDF chart", action="store_true")
+    parser.add_argument("--starhorse_block", help="number of stars/query (default=0, no query)",
+                        default=0, type=int)
+    parser.add_argument("--verbose", help="increase program verbosity", action="store_true")
+    parser.add_argument("--debug", help="debug flag", action="store_true")
+
+    args = parser.parse_args()
+
+    if len(sys.argv) == 1:
+        parser.print_usage()
+        raise SystemExit()
+
+    exec_rgblues(args)
 
 
 if __name__ == "__main__":
