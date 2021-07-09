@@ -45,12 +45,42 @@ RGB_FROM_GAIA_ALLSKY = 'rgb_from_gaia_allsky.fits'
 VERSION = 1.0
 
 
+def right_ascension(ra_str):
+    ra = float(ra_str)
+    if not (0 <= ra <= 360):
+        print('Right ascension must be 0 <= ra <= 360 degree')
+        msg = f'Right ascension {ra} degree out of range'
+        print(msg)
+        raise ValueError(msg)
+    return ra
+
+
+def declination(dec_str):
+    dec = float(dec_str)
+    if not (-90 <= dec <= 90):
+        print('Declination must be -90 <= dec <= 360 degree')
+        msg = f'Declination {dec} degree out of range'
+        print(msg)
+        raise ValueError(msg)
+    return dec
+
+
+def search_radius(r_str):
+    r = float(r_str)
+    if not (0 < r < MAX_SEARCH_RADIUS):
+        print(f'Search radius must be 0 < r <= {MAX_SEARCH_RADIUS} degree')
+        msg = f'Search radius {r} degree out of range'
+        print(msg)
+        raise ValueError(msg)
+    return r
+
+
 def main():
 
     parser = argparse.ArgumentParser(description="RGB predictions for Gaia EDR3 stars")
-    parser.add_argument("ra_center", help="right Ascension (decimal degrees)", type=float)
-    parser.add_argument("dec_center", help="declination (decimal degrees)", type=float)
-    parser.add_argument("search_radius", help="search radius (decimal degrees)", type=float)
+    parser.add_argument("ra_center", help="right Ascension (decimal degrees)", type=right_ascension)
+    parser.add_argument("dec_center", help="declination (decimal degrees)", type=declination)
+    parser.add_argument("search_radius", help="search radius (decimal degrees)", type=search_radius)
     parser.add_argument("g_limit", help="limiting Gaia G magnitude", type=float)
     parser.add_argument("--basename", help="file basename for output files", type=str, default="rgblues")
     parser.add_argument("--brightlimit",
@@ -71,15 +101,6 @@ def main():
     if len(sys.argv) == 1:
         parser.print_usage()
         raise SystemExit()
-
-    if args.ra_center < 0 or args.ra_center > 360:
-        raise SystemExit('ERROR: right ascension out of valid range')
-    if args.dec_center < -90 or args.dec_center > 90:
-        raise SystemExit('ERROR: declination out of valid range')
-    if args.search_radius < 0:
-        raise SystemExit('ERROR: search radius must be > 0 degrees')
-    if args.search_radius > MAX_SEARCH_RADIUS:
-        raise SystemExit(f'ERROR: search radius must be <= {MAX_SEARCH_RADIUS} degrees')
 
     # check whether the auxiliary FITS binary table exists
     if args.debug:
@@ -445,6 +466,8 @@ def main():
         print(r_edr3)
 
     if args.noplot:
+        sys.stdout.write('<STEP8> No PDF plot generated (skipped!)\n')
+        sys.stdout.flush()
         raise SystemExit()
 
     # ---

@@ -1,14 +1,12 @@
 # Particular files
-check_queries.html
-check_queries.ipynb
-edr3_source_id_15M_allsky.fits
-edr3_source_id_params_15M_allsky.fits
-pleiades*
-rgb_from_gaia_allsky.fits
-rgbsearch*
-ToDo.txt
-z_leeme.txt
+rgblues.pdf
+rgblues*csv
 *~
 
 # PyCharm related files
 .idea
+
+# Auxiliary directories
+build
+dist
+rgblues.egg-info
