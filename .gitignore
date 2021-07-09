@@ -10,3 +10,4 @@ rgblues*csv
 build
 dist
 rgblues.egg-info
+rgblues/__pycache__
