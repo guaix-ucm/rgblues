@@ -17,6 +17,8 @@ import sys
 from astropy.table import Column
 import numpy as np
 
+OUTTYPES = ['edr3', '15m', 'var']
+
 
 def step7(r_edr3, basename, starhorse_block, nvariables, r_cross_var,
           intersection, table15M, verbose, debug):
@@ -47,19 +49,13 @@ def step7(r_edr3, basename, starhorse_block, nvariables, r_cross_var,
     debug : bool
         If True, display debugging information.
 
-    Returns
-    -------
-    outtypes : list of str
-        Labels used to identify the different output files.
-
     """
     sys.stdout.write('<STEP7> Saving output CSV files...')
     sys.stdout.flush()
-    outtypes = ['edr3', '15m', 'var']
     r_edr3.add_column(Column(np.zeros(len(r_edr3)), name='number_csv', dtype=int))
-    for item in outtypes:
+    for item in OUTTYPES:
         r_edr3.add_column(Column(np.zeros(len(r_edr3)), name=f'number_{item}', dtype=int))
-    outlist = [f'./{basename}_{ftype}.csv' for ftype in outtypes]
+    outlist = [f'./{basename}_{ftype}.csv' for ftype in OUTTYPES]
     filelist = glob.glob('./*.csv')
     # remove previous versions of the output files (if present)
     for file in outlist:
@@ -87,7 +83,7 @@ def step7(r_edr3, basename, starhorse_block, nvariables, r_cross_var,
         raise SystemExit('ERROR: check outcolumns_list and outcolumns')
     csv_header_ini = 'number,' + ','.join(outcolumns_list)
     flist = []
-    for ftype in outtypes:
+    for ftype in OUTTYPES:
         f = open(f'{basename}_{ftype}.csv', 'wt')
         flist.append(f)
         if (starhorse_block > 0) and (ftype in ['edr3', '15m']):
@@ -102,7 +98,7 @@ def step7(r_edr3, basename, starhorse_block, nvariables, r_cross_var,
             csv_header = csv_header_ini
         f.write(csv_header + '\n')
     # save each star in its corresponding output file
-    krow = np.ones(len(outtypes), dtype=int)
+    krow = np.ones(len(OUTTYPES), dtype=int)
     for irow, row in enumerate(r_edr3):
         cout = []
         for item in outcolumns_list:
@@ -136,7 +132,7 @@ def step7(r_edr3, basename, starhorse_block, nvariables, r_cross_var,
                     cout.append(f"{table15M['dist50'][iloc]:7.3f}")
         flist[iout].write(f'{krow[iout]:6d}, ' + ','.join(cout) + '\n')
         r_edr3[irow]['number_csv'] = iout
-        r_edr3[irow][f'number_{outtypes[iout]}'] = krow[iout]
+        r_edr3[irow][f'number_{OUTTYPES[iout]}'] = krow[iout]
         krow[iout] += 1
     for f in flist:
         f.close()
@@ -144,5 +140,3 @@ def step7(r_edr3, basename, starhorse_block, nvariables, r_cross_var,
 
     if verbose:
         print(r_edr3)
-
-    return outtypes

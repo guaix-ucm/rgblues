@@ -20,10 +20,12 @@ from astropy.coordinates import SkyCoord
 import numpy as np
 
 from .style import mpl_style
+from rgblues.core.step7 import OUTTYPES
+OUTTYPES_COLOR = {'edr3': 'black', '15m': 'red', 'var': 'blue'}
 
 
 def step8(r_edr3, ra_center, dec_center, search_radius, symbsize, brightlimit,
-          nonumbers, nocolor, basename, outtypes, nstars_colorcut, nvariables,
+          nonumbers, nocolor, basename, nstars_colorcut, nvariables,
           r_cross_var, intersection, version, verbose):
     """Perform EDR3 query
 
@@ -50,8 +52,6 @@ def step8(r_edr3, ra_center, dec_center, search_radius, symbsize, brightlimit,
         If True, do not use colors in PDF chart.
     basename : str
         Base name for output files.
-    outtypes : list of str
-        Labels used to identify the different output files.
     nstars_colorcut : int
         Number of stars outside the colour cut
         -0.5 < G_BP - G_RP < 2.0 mag.
@@ -80,7 +80,6 @@ def step8(r_edr3, ra_center, dec_center, search_radius, symbsize, brightlimit,
     """
     sys.stdout.write('<STEP8> Generating PDF plot...')
     sys.stdout.flush()
-    outtypes_color = {'edr3': 'black', '15m': 'red', 'var': 'blue'}
 
     # define WCS
     naxis1 = 1024
@@ -132,9 +131,9 @@ def step8(r_edr3, ra_center, dec_center, search_radius, symbsize, brightlimit,
     if not nonumbers:
         for irow in range(len(r_edr3)):
             number_csv = r_edr3[irow]['number_csv']
-            text = r_edr3[irow][f'number_{outtypes[number_csv]}']
+            text = r_edr3[irow][f'number_{OUTTYPES[number_csv]}']
             ax.text(x_pix[irow], y_pix[irow], text,
-                    color=outtypes_color[outtypes[number_csv]], fontsize='5',
+                    color=OUTTYPES_COLOR[OUTTYPES[number_csv]], fontsize='5',
                     horizontalalignment='left', verticalalignment='bottom')
 
     # stars outside the -0.5 < G_BP - G_RP < 2.0 colour cut
@@ -154,16 +153,16 @@ def step8(r_edr3, ra_center, dec_center, search_radius, symbsize, brightlimit,
         sorter = np.argsort(r_edr3['source_id'])
         iok = np.array(sorter[np.searchsorted(r_edr3['source_id'], np.array(list(intersection)), sorter=sorter)])
         ax.scatter(x_pix[iok], y_pix[iok], s=240, marker='o', facecolors='none',
-                   edgecolors=outtypes_color['15m'], linewidth=0.5)
+                   edgecolors=OUTTYPES_COLOR['15m'], linewidth=0.5)
 
     ax.scatter(0.03, 0.96, s=240, marker='o', facecolors='white',
-               edgecolors=outtypes_color['15m'], linewidth=0.5,
+               edgecolors=OUTTYPES_COLOR['15m'], linewidth=0.5,
                transform=ax.transAxes)
     ax.text(0.06, 0.96, 'star in 15M sample', fontsize=12, backgroundcolor='white',
             horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
 
     ax.scatter(0.03, 0.92, s=240, marker='s', facecolors='white',
-               edgecolors=outtypes_color['var'], linewidth=0.5,
+               edgecolors=OUTTYPES_COLOR['var'], linewidth=0.5,
                transform=ax.transAxes)
     ax.text(0.06, 0.92, 'variable in Gaia DR2', fontsize=12, backgroundcolor='white',
             horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
