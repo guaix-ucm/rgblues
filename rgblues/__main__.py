@@ -96,6 +96,9 @@ def main():
         parser.print_usage()
         raise SystemExit()
 
+    print(f'\n        Welcome to rgblues version {version}')
+    print(f'        ==============================\n')
+
     # check whether the auxiliary FITS binary table exists
     if args.debug:
         auxbintable = RGB_FROM_GAIA_ALLSKY
@@ -195,6 +198,8 @@ def main():
         args.debug
     )
 
+    # ---
+    # step 8: generate PDF chart
     if args.noplot:
         sys.stdout.write('<STEP8> No PDF plot generated (skipped!)\n')
         sys.stdout.flush()
@@ -218,8 +223,6 @@ def main():
             version,
             args.verbose
         )
-
-    # ---
 
 
 if __name__ == "__main__":
