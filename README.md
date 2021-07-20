@@ -196,4 +196,4 @@ https://ui.adsabs.harvard.edu/abs/2019A%26A...628A..94A/abstract
 MNRAS, https://ui.adsabs.harvard.edu/abs/2021MNRAS.504.3730C/abstract
 
 <a id="2">Cardiel et al. (2021b)</a>, 
-MNRAS, in preparation
+MNRAS, in press (see preprint in https://arxiv.org/abs/2107.08734)
