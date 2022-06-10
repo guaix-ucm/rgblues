@@ -186,6 +186,10 @@ please cite [Cardiel et al. (2021a)](#1)
 and [Cardiel et al. (2021b)](#2) (where the transformation between the *Gaia*
 photometry and the RGB magnitudes is derived).
 
+## Related information
+
+You can visit the [RGB Photometry](https://guaix.ucm.es/rgbphot) web page at
+the Universidad Complutense de Madrid.
 
 ## Bibliography
 
@@ -196,4 +200,4 @@ https://ui.adsabs.harvard.edu/abs/2019A%26A...628A..94A/abstract
 MNRAS, https://ui.adsabs.harvard.edu/abs/2021MNRAS.504.3730C/abstract
 
 <a id="2">Cardiel et al. (2021b)</a>, 
-MNRAS, in press (see preprint in https://arxiv.org/abs/2107.08734)
+MNRAS, https://ui.adsabs.harvard.edu/abs/2021MNRAS.507..318C/abstract
