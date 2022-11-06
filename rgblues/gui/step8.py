@@ -67,16 +67,6 @@ def step8(r_edr3, ra_center, dec_center, search_radius, symbsize, brightlimit,
     verbose : bool
         If True, display additional information.
 
-    Returns
-    -------
-    r_edr3 : astropy Table
-        Table containing the query result.
-    nstars : int
-        Number of stars in 'r_edr3'.
-    nstars_colorcut: int
-        Number of stars outside the colour cut
-        -0.5 < G_BP - G_RP < 2.0 mag.
-
     """
     sys.stdout.write('<STEP8> Generating PDF plot...')
     sys.stdout.flush()
