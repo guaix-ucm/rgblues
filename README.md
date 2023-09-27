@@ -1,6 +1,13 @@
 # rgblues
 
-This Python script predicts RGB magnitudes from *Gaia* EDR3 
+**WARNING**: This code is maintained for historical reasons, but has been
+replaced by the alternative code
+[rgbloom](https://pypi.org/project/rgbloom/), which is based on the work
+published by [Carrasco et al. (2023)](#3).
+
+## Introduction
+
+The script `rgblues` predicts RGB magnitudes from *Gaia* EDR3 
 photometric data. These magnitudes are given in the standard system defined by
 [Cardiel et al. (2021a)](#1).
 
@@ -30,6 +37,15 @@ $ . venv_rgb/bin/activate
 
 ### Installing the package
 
+We recommend installing the latest stable version, which is available via the
+[PyPI repository](https://pypi.org/project/rgblues/):
+
+```bash
+(venv_rgb) $ pip install rgblues
+```
+
+The latest development version is available through [GitHub](https://github.com/nicocardiel/rgblues):
+
 ```bash
 (venv_rgb) $ pip install git+https://github.com/guaix-ucm/rgblues.git@main#egg=rgblues
 ```
@@ -51,6 +67,33 @@ The first time you execute the code, the auxiliary file
 the *Gaia* EDR3 stars belonging to the ~15 million star sample of C21, is
 automatically downloaded to a cache directory (you do not have to worry
 about its location). 
+
+The execution of this example should led to the following output in the terminal 
+(except for the absolute path where the auxiliary downloaded file is stored):
+
+```
+        Welcome to rgblues version 1.2
+        ==============================
+
+Downloading data from 'http://nartex.fis.ucm.es/~ncl/rgbphot/gaia/edr3_source_id_15M_allsky.fits' to file '/Users/cardiel/Library/Caches/pooch/bf659d7a02408a54b3fa6b62fb3b051e-edr3_source_id_15M_allsky.fits'.
+<STEP1> Starting cone search in Gaia EDR3... (please wait)
+  INFO: Query finished. [astroquery.utils.tap.core]
+        --> 310 stars found
+        --> 19 stars outside -0.5 < G_BP-G_RP < 2.0
+<STEP2> Retrieving StarHorse data from Gaia@AIP... (skipped!)
+<STEP3> Cross-matching EDR3 with 15M subsample... (please wait)
+        --> 55 stars in common with 15M sample
+<STEP4> Looking for variable stars in Gaia DR2... (please wait)
+  INFO: Query finished. [astroquery.utils.tap.core]
+        --> 310 stars in DR2, (2 initial variables)
+<STEP5> Cross-matching variables in DR2 with stars in EDR3... (please wait)
+  INFO: Query finished. [astroquery.utils.tap.core]
+        --> 2 variable(s) in selected EDR3 star sample
+<STEP6> Computing RGB magnitudes...OK
+<STEP7> Saving output CSV files...OK
+<STEP8> Generating PDF plot...OK
+End of program
+```
 
 The script executes the following steps:
 
@@ -129,8 +172,10 @@ The script executes the following steps:
 - Step 8: generation of a finding chart plot (in PDF format): `rgblues.pdf`. 
   The execution of the previous example generates a cone search around 
   the [Pleiades](https://en.wikipedia.org/wiki/Pleiades) star cluster:
-  ![Pleiades plot](http://nartex.hst.ucm.es/~ncl/rgbphot/gaia/pleiades_v4.png)
-  The stars in this plot are color coded based on the *Gaia* G_BP - G_RP 
+  ![Pleiades plot](http://nartex.hst.ucm.es/~ncl/rgbphot/gaia/pleiades_v5.png)
+  The stars in this plot 
+  (see [PDF file](http://nartex.hst.ucm.es/~ncl/rgbphot/gaia/pleiades_v5.pdf))
+  are color coded based on the *Gaia* G_BP - G_RP 
   colour. A red circle has been overplotted on the stars belonging to 
   the ~15 million star sample of C21, a blue square on the variable 
   objects in DR2, and a grey diamond on EDR3 stars outside the *Gaia* 
@@ -201,3 +246,5 @@ MNRAS, https://ui.adsabs.harvard.edu/abs/2021MNRAS.504.3730C/abstract
 
 <a id="2">Cardiel et al. (2021b)</a>, 
 MNRAS, https://ui.adsabs.harvard.edu/abs/2021MNRAS.507..318C/abstract
+
+<a id="3">Carrasco et al. (2023)</a>, Remote Sensing, https://www.mdpi.com/2072-4292/15/7/1767
