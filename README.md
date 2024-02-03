@@ -1,13 +1,8 @@
 # rgblues
 
-**WARNING**: This code is maintained for historical reasons, but has been
-replaced by the alternative code
-[rgbloom](https://pypi.org/project/rgbloom/), which is based on the work
-published by [Carrasco et al. (2023)](#3).
-
 ## Introduction
 
-The script `rgblues` predicts RGB magnitudes from *Gaia* EDR3 
+This Python package `rgblues` predicts RGB magnitudes from *Gaia* EDR3 
 photometric data. These magnitudes are given in the standard system defined by
 [Cardiel et al. (2021a)](#1).
 
@@ -21,6 +16,10 @@ package of astropy.
 
 You need to have a live connection to the Internet for 
 the script to work!
+
+**Note**: You might also be interested in the Python package 
+[rgbloom](https://pypi.org/project/rgbloom/), which is based on the work
+published by [Carrasco et al. (2023)](#3).
 
 ## Installing the code
 
