@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2021 Universidad Complutense de Madrid
+# Copyright 2021-2024 Universidad Complutense de Madrid
 #
 # SPDX-License-Identifier: GPL-3.0+
 # License-Filename: LICENSE.txt
@@ -72,5 +72,10 @@ def step4(ra_center, dec_center, search_radius, g_limit, verbose):
     if nvariables > 0:
         if verbose:
             r_dr2[mask_var].pprint(max_width=1000)
+
+    # change the column labels to lowercase
+    # (important: the Gaia database has changed 'source_id' by 'SOURCE_ID')
+    new_colnames = [colname.lower() for colname in r_dr2.colnames]
+    r_dr2.rename_columns(r_dr2.colnames, new_colnames)
 
     return r_dr2, nvariables, mask_var
